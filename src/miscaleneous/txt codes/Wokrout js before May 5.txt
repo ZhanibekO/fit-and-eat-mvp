@@ -1,0 +1,240 @@
+// workout.js
+
+// Load environment variables from the .env file
+require("dotenv").config();
+
+const express = require("express");
+const fetch = require("node-fetch");
+const router = express.Router();
+
+// Ensure OPENAI_API_KEY is defined.
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  console.error("Error: OPENAI_API_KEY is not defined. Please set it in your .env file.");
+  process.exit(1);
+}
+
+/* ===================== */
+/* NUTRITION CALCULATIONS */
+/* ===================== */
+function calculateCalorieTarget(profile) {
+  const weight = parseFloat(profile.weight);
+  const height = parseFloat(profile.height);
+  const age = parseInt(profile.age);
+  if (isNaN(weight) || isNaN(height) || isNaN(age)) return 1650;
+  const bmr =
+    profile.gender && profile.gender.toLowerCase() === "male"
+      ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+      : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  let activityFactor = 1.2;
+  if (profile.activityLevel) {
+    const level = profile.activityLevel.toLowerCase();
+    if (level.includes("moderately")) {
+      activityFactor = 1.55;
+    } else if (level.includes("very")) {
+      activityFactor = 1.725;
+    }
+  }
+  let tdee = bmr * activityFactor;
+  if (profile.fitnessGoal) {
+    const goal = profile.fitnessGoal.toLowerCase();
+    if (goal === "loseweight") tdee *= 0.85;
+    else if (goal === "gainmuscle") tdee *= 1.10;
+  }
+  return Math.round(tdee);
+}
+
+function calculateMacros(calories) {
+  const protein = Math.round((calories * 0.30) / 4);
+  const carbs = Math.round((calories * 0.40) / 4);
+  const fat = Math.round((calories * 0.30) / 9);
+  return { protein, carbs, fat };
+}
+
+/* ===================== */
+/* HELPER: Balance Braces */
+/* ===================== */
+function balanceBraces(text) {
+  const openCount = (text.match(/{/g) || []).length;
+  const closeCount = (text.match(/}/g) || []).length;
+  if (openCount > closeCount) {
+    text += "}".repeat(openCount - closeCount);
+  }
+  return text;
+}
+
+/* ===================== */
+/* ROUTE: Generate Workout Plan */
+/* ===================== */
+router.post("/generate-workout", async (req, res) => {
+  const { gender, age, weight, weightUnit, height, heightUnit, fitnessGoal, goalWeight, workoutType, fitnessLevel, timeCommitment, activityLevel, equipment, specificGoals } = req.body;
+
+  const tdee = weight && height && age && activityLevel
+    ? calculateCalorieTarget({ gender, weight, height, age, activityLevel, fitnessGoal })
+    : 1650;
+  const macros = calculateMacros(tdee);
+  const nutritionSummaryMessage = fitnessGoal
+    ? `Calories: ${tdee}, Protein: ${macros.protein}g, Carbs: ${macros.carbs}g, Fat: ${macros.fat}g for ${fitnessGoal}.`
+    : "";
+
+  // Build a simple prompt with minimal descriptions.
+  const workoutPrompt = `Generate a 7-day workout plan for weight loss.
+Return ONLY a valid JSON object exactly in this format and nothing else, then append OUTPUT_END:
+{
+  "Monday": {"warmUp": "5 min jog", "mainCircuit": ["Push-ups 30s", "Squats 30s", "Plank 30s"], "rest": "1 min", "coolDown": "5 min stretch"},
+  "Tuesday": {"warmUp": "5 min jump rope", "mainCircuit": ["Burpees 30s", "Lunges 30s", "Sit-ups 30s"], "rest": "1 min", "coolDown": "5 min stretch"},
+  "Wednesday": {"warmUp": "5 min high knees", "mainCircuit": ["Push-ups 30s", "Jump Squats 30s", "Plank 30s"], "rest": "1 min", "coolDown": "5 min stretch"},
+  "Thursday": {"warmUp": "5 min jog", "mainCircuit": ["Mountain Climbers 30s", "Squats 30s", "Leg Raises 30s"], "rest": "1 min", "coolDown": "5 min stretch"},
+  "Friday": {"warmUp": "5 min jump rope", "mainCircuit": ["Push-ups 30s", "Plank 30s", "Burpees 30s"], "rest": "1 min", "coolDown": "5 min stretch"},
+  "Saturday": {"warmUp": "5 min high knees", "mainCircuit": ["Lunges 30s", "Sit-ups 30s", "Jump Squats 30s"], "rest": "1 min", "coolDown": "5 min stretch"},
+  "Sunday": "Rest Day"
+}
+- Gender: ${gender || "not provided"}
+- Age: ${age || "not provided"}
+- Weight: ${weight || "not provided"} ${weightUnit || ""}
+- Height: ${height || "not provided"} ${heightUnit || ""}
+- Fitness Goal: ${fitnessGoal || "not provided"}
+- Target Weight: ${goalWeight || "not specified"}
+- Workout Type: ${workoutType || "not specified"}
+- Fitness Level: ${fitnessLevel || "not provided"}
+- Time Commitment: ${timeCommitment || "not provided"}
+- Activity Level: ${activityLevel || "not provided"}
+- Equipment: ${equipment && equipment.length ? equipment.join(", ") : "none"}
+- Specific Goals: ${specificGoals || "none"}
+${nutritionSummaryMessage}
+OUTPUT_END`;
+
+  try {
+    console.log("Workout Prompt Sent to OpenAI:", workoutPrompt);
+    // Restrict max_tokens to 400 to force a short output.
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: workoutPrompt }],
+        temperature: 0.3,
+        max_tokens: 400,
+        stop: ["OUTPUT_END"]
+      })
+    });
+
+    const apiResult = await aiResponse.json();
+    console.log("Raw API JSON Response:", JSON.stringify(apiResult, null, 2));
+    if (!apiResult.choices || !apiResult.choices[0] || !apiResult.choices[0].message) {
+      console.error("Unexpected API response format");
+      return res.status(500).json({ workout: null, error: "Unexpected API response format." });
+    }
+    console.log("Finish reason:", apiResult.choices[0].finish_reason);
+    if (apiResult.choices[0].finish_reason === "length") {
+      console.warn("API response truncated due to token limits.");
+      return res.status(500).json({ workout: null, error: "Workout output truncated. Please try again with a shorter prompt." });
+    }
+
+    let workoutText = apiResult.choices[0].message.content.trim();
+    console.log("Extracted workoutText:", workoutText);
+
+    // Remove the OUTPUT_END marker.
+    workoutText = workoutText.replace(/OUTPUT_END\s*$/i, "").trim();
+
+    // Extract JSON portion: from the first "{" to the last "}".
+    const firstBrace = workoutText.indexOf("{");
+    const lastBrace = workoutText.lastIndexOf("}");
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace) {
+      console.error("Could not determine proper JSON boundaries.");
+      return res.status(500).json({ workout: null, error: "Invalid workout format received from server." });
+    }
+    workoutText = workoutText.slice(firstBrace, lastBrace + 1);
+    console.log("Extracted JSON from boundaries:", workoutText);
+
+    // Cleanup: remove BOM and extra commas.
+    workoutText = workoutText.replace(/^\uFEFF/, "").trim();
+    workoutText = workoutText.replace(/,(\s*})/g, "$1");
+    if (workoutText.slice(-1) !== "}") {
+      workoutText += "}";
+      console.log("Appended missing closing brace:", workoutText);
+    }
+    workoutText = balanceBraces(workoutText);
+    console.log("Cleaned workoutText after balancing, first 50 chars:", workoutText.slice(0, 50), "...", "last 50 chars:", workoutText.slice(-50));
+
+    let workoutPlan;
+    try {
+      workoutPlan = JSON.parse(workoutText);
+      console.log("Parsed workoutPlan object:", workoutPlan);
+    } catch (e) {
+      console.error("Error parsing workout JSON:", e);
+      return res.status(500).json({ workout: null, error: "Invalid workout format received from server." });
+    }
+
+    // Build HTML to display the workout plan.
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    let tableRows = "";
+    dayNames.forEach(day => {
+      let dayContent = "";
+      if (typeof workoutPlan[day] === "object") {
+        dayContent += `<strong>Warm-Up:</strong> ${workoutPlan[day].warmUp}<br>`;
+        dayContent += `<strong>Main Circuit:</strong><br><ul>`;
+        workoutPlan[day].mainCircuit.forEach(exercise => {
+          dayContent += `<li>${exercise}</li>`;
+        });
+        dayContent += `</ul>`;
+        dayContent += `<strong>Rest:</strong> ${workoutPlan[day].rest}<br>`;
+        dayContent += `<strong>Cool-Down:</strong> ${workoutPlan[day].coolDown}`;
+      } else {
+        dayContent = workoutPlan[day];
+      }
+      tableRows += `<tr>
+        <td style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#34495e; font-weight:bold;">${day}</td>
+        <td style="padding:8px; border:1px solid #ccc; color:#333;">${dayContent}</td>
+      </tr>`;
+    });
+
+    const workoutInstructions = `<div style="text-align:center; font-size:1rem; color:#34495e; margin:10px 0;">
+<strong>Workout Instructions:</strong><br>
+Circuit-style bodyweight workout with 3 rounds.<br>
+Rest 1 minute between exercises and 2 minutes after each circuit.<br>
+Finish with 5 min stretching.
+</div>`;
+
+    const headerText = `<p style="text-align:center; color:#34495e; font-size:1.2rem;">
+Your 7-day Workout Plan for Weight Loss
+</p>`;
+    const finalMessage = `<p style="text-align:center; color:#34495e; font-size:1rem;">
+Go at your pace. Warm up before, cool down after.
+Good luck!
+</p>`;
+
+    let tableHTML = `
+      ${workoutInstructions}
+      ${headerText}
+      <table class="workout-table">
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Exercise Routine</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+      ${finalMessage}
+      <div style="text-align:center; margin-top:20px;">
+        <button id="generateMealPlan" class="meal-plan-btn">Generate Custom Meal Plan</button>
+      </div>
+    `;
+    tableHTML = compressHTML(tableHTML);
+    console.log("Final Workout Table HTML:", tableHTML);
+    console.log("Final HTML being sent to the client:", tableHTML);
+    
+    res.json({ workout: tableHTML, error: null });
+  } catch (error) {
+    console.error("Error Fetching Workout Plan:", error);
+    res.status(500).json({ workout: null, error: "Failed to generate workout. Server-side error." });
+  }
+});
+
+module.exports = router;

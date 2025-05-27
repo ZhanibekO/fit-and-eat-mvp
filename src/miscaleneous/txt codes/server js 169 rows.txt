@@ -1,0 +1,169 @@
+// Load environment variables from the .env file
+require("dotenv").config();
+
+// Import dependencies
+const express = require("express");
+const fetch = require("node-fetch");
+const app = express();
+
+// Access your API key from .env
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+// Debugging: Confirm API key is loaded
+if (!OPENAI_API_KEY) {
+  console.error("API Key is missing. Please check your .env file.");
+  process.exit(1); // Exit if API key is not provided
+}
+
+// Middleware to parse JSON requests
+app.use(express.json());
+
+// Serve static files from the "public" folder
+app.use(express.static("public"));
+
+// Generate workout plan endpoint
+app.post("/generate-workout", async (req, res) => {
+  const { gender, age, weight, weightUnit, height, heightUnit, fitnessGoal, goalWeight, workoutType } = req.body;
+
+  const workoutPrompt = `Generate a personalized workout plan based on the following details:
+    - Gender: ${gender || "not provided"}
+    - Age: ${age || "not provided"}
+    - Weight: ${weight || "not provided"} ${weightUnit || ""}
+    - Height: ${height || "not provided"} ${heightUnit || ""}
+    - Fitness Goal: ${fitnessGoal || "not provided"}
+    - Weight Goal: ${goalWeight || "not specified"}
+    - Workout Type: ${workoutType || "not specified"}
+    Ensure the plan includes daily routines with clear instructions for each exercise.`;
+
+  try {
+    console.log("Workout Prompt Sent to OpenAI:", workoutPrompt);
+
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: workoutPrompt }],
+        temperature: 0.7,
+        max_tokens: 768,
+      }),
+    });
+
+    const responseText = await aiResponse.text(); // Get raw response as text
+    console.log("Raw API Response:", responseText);
+
+    try {
+      const data = JSON.parse(responseText); // Attempt to parse as JSON
+      const workout = data.choices?.[0]?.message?.content?.trim() || "No workout plan could be generated.";
+      console.log("Generated Workout Plan:", workout);
+
+      if (!workout.trim()) {
+        console.error("Workout plan generation failed.");
+        return res.status(500).json({ workout: null, error: "Workout plan is empty. Please try again." });
+      }
+
+      res.json({ workout, error: null });
+    } catch (error) {
+      console.error("Error parsing API response:", error);
+      res.status(500).json({ workout: null, error: "Failed to parse response from OpenAI." });
+    }
+  } catch (error) {
+    console.error("Server Error Generating Workout:", error);
+    res.status(500).json({ workout: null, error: "Failed to generate workout. Server-side error." });
+  }
+});
+
+// Generate meal plan endpoint
+app.post("/generate-meal-plan", async (req, res) => {
+  const { dietStyle, allergies, lactoseIntolerant, additionalComments } = req.body;
+
+  console.log("Received Meal Preferences:", { dietStyle, allergies, lactoseIntolerant, additionalComments });
+
+  if (!dietStyle || !allergies) {
+    return res.status(400).json({ error: "Missing required fields for meal plan generation." });
+  }
+
+  const mealPlanPrompt = `Generate a personalized weekly meal plan based on the following details:
+    - Dietary Preferences: ${dietStyle || "General"}
+    - Allergies: ${allergies || "None"}
+    - Lactose Intolerant: ${lactoseIntolerant ? "Yes" : "No"}
+    - Additional Comments: ${additionalComments || "No additional comments provided"}
+  Include:
+    - Macros (carbohydrates, proteins, fats) for each meal,
+    - Simple recipes for meal preparation,
+    - A detailed grocery list labeled as "Grocery List: <list items>".`;
+
+  try {
+    console.log("Meal Plan Prompt Sent to OpenAI:", mealPlanPrompt);
+
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: mealPlanPrompt }],
+        temperature: 0.7,
+        max_tokens: 1500,
+      }),
+    });
+
+    const data = await aiResponse.json();
+    console.log("Full OpenAI Response:", JSON.stringify(data, null, 2)); // Log full response for debugging
+
+    const mealPlan = data.choices?.[0]?.message?.content?.trim() || null;
+    console.log("Extracted Meal Plan:", mealPlan); // Log extracted meal plan
+
+    const groceryList = mealPlan?.includes("Grocery List:")
+      ? mealPlan.split("Grocery List:")[1].trim()
+      : null;
+    console.log("Extracted Grocery List:", groceryList || "No grocery list provided."); // Log extracted grocery list
+
+    if (!mealPlan) {
+      console.error("Meal plan generation failed.");
+      return res.status(500).json({ mealPlan: null, groceryList: null, error: "Meal plan is empty. Please try again." });
+    }
+
+    if (!groceryList) {
+      console.warn("Grocery list not found in meal plan.");
+    }
+
+    res.json({ mealPlan, groceryList, error: null });
+  } catch (error) {
+    console.error("Server Error Generating Meal Plan:", error);
+    res.status(500).json({ mealPlan: null, groceryList: null, error: "Failed to generate meal plan. Server-side error." });
+  }
+});
+
+// Submit goals endpoint
+app.post("/submit-goals", (req, res) => {
+  const { userGoals } = req.body;
+
+  // Validate that userGoals is provided
+  if (!userGoals) {
+    console.error("User goals not provided.");
+    return res.status(400).json({ success: false, message: "User goals are required." });
+  }
+
+  // Log user goals to the console (for debugging)
+  console.log("User goals received:", userGoals);
+
+  // Respond with success
+  res.status(200).json({ success: true, message: "Goals submitted successfully." });
+});
+
+// Catch-all for invalid routes
+app.use((req, res) => {
+  res.status(404).json({ error: "Endpoint not found" });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});

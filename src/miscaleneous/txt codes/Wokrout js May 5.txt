@@ -1,0 +1,178 @@
+// workout.js
+
+// Load environment variables from the .env file
+require("dotenv").config();
+
+const express = require("express");
+const fetch = require("node-fetch");
+const router = express.Router();
+
+// Ensure OPENAI_API_KEY is defined.
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  console.error("Error: OPENAI_API_KEY is not defined. Please set it in your .env file.");
+  process.exit(1);
+}
+
+/* ===================== */
+/* HELPER: compressHTML  */
+/* ===================== */
+function compressHTML(html) {
+  return html.replace(/\n/g, "").replace(/>\s+</g, "><").trim();
+}
+
+/* ===================== */
+/* HELPER: balanceBraces */
+/* ===================== */
+function balanceBraces(text) {
+  const openCount = (text.match(/{/g) || []).length;
+  const closeCount = (text.match(/}/g) || []).length;
+  if (openCount > closeCount) {
+    console.warn(`Balancing braces: adding ${openCount - closeCount} missing '}'`);
+    text += "}".repeat(openCount - closeCount);
+  }
+  return text;
+}
+
+/* ===================== */
+/* ROUTE: Generate Workout Plan */
+/* ===================== */
+router.post("/generate-workout", async (req, res) => {
+  // A strict prompt for a comprehensive 7-day workout plan.
+  const workoutPrompt = `Generate a comprehensive and robust 7-day workout plan for weight loss for a general adult audience.
+Return ONLY a valid JSON object in EXACTLY the following format without any extra text, markdown code fences, explanations, or commentary. Do not include anything else.
+{
+  "Monday": {"warmUp": "5 min dynamic warm-up (jumping jacks, high knees)", "mainCircuit": ["Push-ups 30s", "Squats 30s", "Burpees 30s"], "rest": "1 min rest", "coolDown": "5 min stretching (hamstring and calf stretch)"},
+  "Tuesday": {"warmUp": "5 min dynamic warm-up (arm circles, leg swings)", "mainCircuit": ["Lunges 30s", "Plank 30s", "Mountain Climbers 30s"], "rest": "1 min rest", "coolDown": "5 min stretching (quad and shoulder stretch)"},
+  "Wednesday": {"warmUp": "5 min jogging in place", "mainCircuit": ["Burpees 30s", "Sit-ups 30s", "Push-ups 30s"], "rest": "1 min rest", "coolDown": "5 min full body stretch"},
+  "Thursday": {"warmUp": "5 min dynamic warm-up (leg swings, high knees)", "mainCircuit": ["Squats 30s", "Reverse Lunges 30s", "High Knees 30s"], "rest": "1 min rest", "coolDown": "5 min stretching (hamstring and quad stretch)"},
+  "Friday": {"warmUp": "5 min brisk walk or light jog", "mainCircuit": ["Jumping Jacks 30s", "Plank 30s", "Burpees 30s"], "rest": "1 min rest", "coolDown": "5 min stretching (chest and shoulder stretch)"},
+  "Saturday": {"warmUp": "5 min dynamic warm-up (butt kicks, arm swings)", "mainCircuit": ["Push-ups 30s", "Squats 30s", "Mountain Climbers 30s"], "rest": "1 min rest", "coolDown": "5 min stretching (calf and back stretch)"},
+  "Sunday": "Rest Day - Take a light 10-minute walk or perform gentle stretching for recovery."
+}
+OUTPUT_END`;
+
+  try {
+    console.log("Workout Prompt Sent to OpenAI:", workoutPrompt);
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: workoutPrompt }],
+        temperature: 0.3,
+        max_tokens: 1500,
+        stop: ["OUTPUT_END"]
+      })
+    });
+    const apiResult = await aiResponse.json();
+    console.log("Raw API JSON Response:", JSON.stringify(apiResult, null, 2));
+    if (!apiResult.choices || !apiResult.choices[0] || !apiResult.choices[0].message) {
+      return res.status(500).json({ workout: null, error: "Unexpected API response format." });
+    }
+    if (apiResult.choices[0].finish_reason === "length") {
+      console.warn("API response was truncated due to token limits.");
+      return res.status(500).json({ workout: null, error: "Workout output truncated. Please try again with a shorter prompt." });
+    }
+    
+    let workoutText = apiResult.choices[0].message.content.trim();
+    console.log("Raw workoutText received:", workoutText);
+    
+    // Remove markdown code fences if present.
+    if (workoutText.startsWith("```")) {
+      workoutText = workoutText.replace(/^```(json)?\s*/i, "").replace(/\s*```$/, "").trim();
+      console.log("WorkoutText after removing markdown delimiters:", workoutText);
+    }
+    
+    // Remove any text before the first '{'...
+    const firstBrace = workoutText.indexOf("{");
+    if (firstBrace > 0) {
+      workoutText = workoutText.substring(firstBrace);
+      console.log("WorkoutText after removing extra text before JSON:", workoutText);
+    }
+    // ...and after the last '}'
+    const lastBrace = workoutText.lastIndexOf("}");
+    if (lastBrace < workoutText.length - 1) {
+      workoutText = workoutText.substring(0, lastBrace + 1);
+      console.log("WorkoutText after trimming extra text after JSON:", workoutText);
+    }
+    
+    // Remove the OUTPUT_END marker if it persists.
+    workoutText = workoutText.replace(/OUTPUT_END\s*$/i, "").trim();
+    
+    // Use regex as a safety net to extract a JSON block.
+    const jsonMatch = workoutText.match(/{[\s\S]*}/);
+    if (!jsonMatch) {
+      console.error("Regex failed to extract JSON. Full workoutText:", workoutText);
+      return res.status(500).json({ workout: null, error: "Invalid workout format received from server." });
+    }
+    workoutText = jsonMatch[0];
+    console.log("Extracted JSON using regex:", workoutText);
+    
+    // Cleanup: remove BOM, fix trailing commas, and balance braces.
+    workoutText = workoutText.replace(/^\uFEFF/, "").trim();
+    workoutText = workoutText.replace(/,(\s*})/g, "$1");
+    if (workoutText.slice(-1) !== "}") {
+      workoutText += "}";
+      console.log("Appended missing closing brace. New workoutText:", workoutText);
+    }
+    workoutText = balanceBraces(workoutText);
+    console.log("Cleaned workoutText after balancing, first 50 chars:", workoutText.slice(0, 50), "...", "last 50 chars:", workoutText.slice(-50));
+    
+    let workoutPlan;
+    try {
+      workoutPlan = JSON.parse(workoutText);
+      console.log("Parsed workoutPlan object:", workoutPlan);
+    } catch (e) {
+      console.error("Error parsing workout JSON:", e);
+      return res.status(500).json({ workout: null, error: "Invalid workout format received from server." });
+    }
+    
+    // Build an HTML table to display the 7-day workout plan.
+    let tableRows = "";
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    dayNames.forEach(day => {
+      let dayContent = "";
+      if (workoutPlan[day] && typeof workoutPlan[day] === "object") {
+        dayContent += `<strong>Warm-Up:</strong> ${workoutPlan[day].warmUp}<br>`;
+        dayContent += `<strong>Main Circuit:</strong> ${workoutPlan[day].mainCircuit.join(", ")}<br>`;
+        dayContent += `<strong>Rest:</strong> ${workoutPlan[day].rest}<br>`;
+        dayContent += `<strong>Cool-Down:</strong> ${workoutPlan[day].coolDown}`;
+      } else if (workoutPlan[day]) {
+        dayContent = workoutPlan[day];
+      } else {
+        dayContent = "No workout data.";
+      }
+      tableRows += `<tr>
+        <td style="padding:8px; border:1px solid #ccc;">${day}</td>
+        <td style="padding:8px; border:1px solid #ccc;">${dayContent}</td>
+      </tr>`;
+    });
+    
+    const tableHTML = compressHTML(`
+      <div style="text-align:center; font-size:1rem;">Your 7-day Workout Plan for Weight Loss</div>
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="padding:8px; border:1px solid #ccc;">Day</th>
+            <th style="padding:8px; border:1px solid #ccc;">Plan</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+      <div style="text-align:center; font-size:1rem; margin-top:10px;">Good luck!</div>
+    `);
+    console.log("Final HTML being sent to the client:", tableHTML);
+    res.json({ workout: tableHTML, error: null });
+  } catch (error) {
+    console.error("Error Fetching Workout Plan:", error);
+    res.status(500).json({ workout: null, error: "Failed to generate workout. Server-side error." });
+  }
+});
+
+module.exports = router;

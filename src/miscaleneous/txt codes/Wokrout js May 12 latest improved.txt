@@ -1,0 +1,345 @@
+// workout.js
+
+// Load environment variables from the .env file
+require("dotenv").config();
+
+const express = require("express");
+const fetch = require("node-fetch");
+const router = express.Router();
+
+// Ensure OPENAI_API_KEY is defined.
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  console.error("Error: OPENAI_API_KEY is not defined. Please set it in your .env file.");
+  process.exit(1);
+}
+
+/* ===================== */
+/* HELPER FUNCTIONS      */
+/* ===================== */
+function compressHTML(html) {
+  return html.replace(/\n/g, "").replace(/>\s+</g, "><").trim();
+}
+
+function balanceBraces(text) {
+  const openCount = (text.match(/{/g) || []).length;
+  const closeCount = (text.match(/}/g) || []).length;
+  if (openCount > closeCount) {
+    console.warn(`Balancing braces: adding ${openCount - closeCount} missing '}'`);
+    text += "}".repeat(openCount - closeCount);
+  }
+  return text;
+}
+
+// Helper to format long instruction strings into separate lines.
+function formatText(text) {
+  if (!text) return "";
+  // Replace periods followed by a space with a period and a <br> tag.
+  return text.replace(/\. /g, ".<br>");
+}
+
+// Helper to format an exercise—ensuring "Primary muscles worked:" is bold and on a new line.
+function formatExercise(ex) {
+  if (!ex) return "";
+  // Insert a line break and wrap in <strong> when "Primary muscles worked:" appears.
+  return ex.replace(/Primary muscles worked:/gi, "<br><strong>Primary muscles worked:</strong> ");
+}
+
+/* ===================== */
+/* ROUTE: Generate Workout Plan */
+/* ===================== */
+router.post("/generate-workout", async (req, res) => {
+  // Destructure user input from the request body.
+  const {
+    fitnessGoal,
+    workoutType,
+    fitnessLevel,
+    timeCommitment,
+    equipment,
+    specificGoals,
+    lifestyle,
+  } = req.body;
+
+  // For ease of reference.
+  const userProfileData = req.body;
+
+  // Build a dynamic prompt that instructs the AI to output detailed instructions for each day.
+  let dynamicPrompt = `Generate a highly detailed 7-day workout plan for weight loss tailored for a general adult user with the following criteria:
+Fitness Goal: ${fitnessGoal}.
+Workout Type: ${workoutType}.
+Fitness Level: ${fitnessLevel}.
+Time Commitment per Session: ${timeCommitment}.
+`;
+  if (equipment && equipment.length > 0) {
+    dynamicPrompt += `Available Equipment: ${equipment.join(", ")}.
+`;
+  } else {
+    dynamicPrompt += `Available Equipment: None.
+`;
+  }
+  dynamicPrompt += `Specific Fitness Goals: ${specificGoals ? specificGoals : "None"}.
+Lifestyle: ${lifestyle ? lifestyle : "General adult"}.
+  
+Please generate a personalized workout plan that ensures the plan is clear, safe, and easy to follow. Include a brief safety disclaimer advising users to consult a professional before beginning any new exercise if they experience discomfort.
+
+`;
+
+  // Add instructions conditionally based on workout type.
+  if (workoutType.toLowerCase() === "home" || workoutType.toLowerCase() === "bodyweight") {
+    dynamicPrompt += `
+For a bodyweight/home workout (Tabata-style), follow these guidelines:
+
+1. IF the time commitment is "10-20 minutes":
+   - **Warm-Up (3 minutes):** Provide 2-3 dynamic warm-up exercises (e.g., 30 seconds each of light cardio and dynamic stretches). Explain briefly which muscles are activated.
+   - **Main Circuit (1 circuit):** Create 2-3 simple exercises. For each, list the exercise name, provide detailed form instructions, and then on a new line in bold state "Primary muscles worked:" along with the targeted muscles. Each exercise should be performed for 30 seconds.
+   - **Rest & Cool-Down:** Include a 1-minute active recovery (deep breathing/light stretching) and a 3-minute cool-down with 2-3 static stretches. Explain recovery benefits.
+   - **Safety Notice:** Advise users to start slowly and to consult a professional if any pain occurs.
+
+2. IF the time commitment is "20-30 minutes":
+   - **Warm-Up (4 minutes):** Provide 3-4 dynamic exercises with brief benefits noted.
+   - **Main Circuit (1 circuit):** Specify 3-4 exercises, each for around 40-45 seconds, with detailed instructions and a bold "Primary muscles worked:" line.
+   - **Rest & Cool-Down:** Insert a 1-minute recovery period and a 4-minute cool-down with detailed stretching.
+   - **Motivational Tip:** Offer a brief note like "Stay focused—progress takes time."
+
+3. IF the time commitment is "30-45 minutes":
+   - **Warm-Up (5 minutes):** Include various dynamic movements (e.g., high knees, leg swings) with brief descriptions.
+   - **Main Circuit (2 circuits):** Each circuit should have 3-4 exercises performed for 30-40 seconds each, with clear form instructions and a bold "Primary muscles worked:" line for each.
+   - **Rest & Cool-Down:** Include a 1-minute rest after each circuit and conclude with a 5-minute cool-down that details each stretch.
+   - **Progressive Guidance:** Suggest that users can gradually increase duration or number of circuits over time.
+   - **Safety & Modification Tips:** Provide simpler alternatives for beginners and optional intensifications for intermediates/advanced users.
+
+4. IF the time commitment is "45-60 minutes":
+   - **Warm-Up (6 minutes):** Give an extended warm-up with a broad range of dynamic exercises and brief benefits for each.
+   - **Main Circuit (3 circuits):** Provide 3 circuits where each circuit includes 3-4 exercises performed for 45 seconds to 1 minute each, with detailed instructions and a bold "Primary muscles worked:" line. Allow for a 1-minute recovery between circuits with additional recovery ideas.
+   - **Rest & Cool-Down:** End with a 6-minute cool-down focusing on mobility and flexibility.
+   - **Safety & Progressive Overload:** Encourage progression and include optional modifications for advanced users.
+   - **Motivational Note:** Include a note such as "Great job today! Every workout brings you closer to your goals."
+
+`;
+  } else if (workoutType.toLowerCase() === "gym") {
+    // Instructions for gym workouts
+    dynamicPrompt += `
+For a gym workout routine, follow these guidelines:
+
+1. IF the time commitment is "10-20 minutes":
+   - **Warm-Up (3 minutes):** Provide a quick warm-up with dynamic stretches and light cardio (e.g., treadmill walking, elliptical). Briefly explain the target muscles.
+   - **Main Circuit (1 circuit):** Generate 2-3 gym-based exercises (e.g., dumbbell exercises, cable movements) with a reps/sets format (e.g., 2 sets of 8-10 reps). For each exercise, include the name, detailed steps for proper form, and on a new line in bold state "Primary muscles worked:" followed by the targeted muscles.
+   - **Rest & Cool-Down:** Include a 1-minute rest between circuits and a 3-minute cool-down incorporating static stretches.
+   - **Safety Notice:** Emphasize proper form and recommend lighter weights for beginners.
+
+2. IF the time commitment is "20-30 minutes":
+   - **Warm-Up (4 minutes):** Include dynamic warm-up exercises geared toward gym movements (e.g., light cardio, dynamic stretching).
+   - **Main Circuit (1 circuit):** Provide 3-4 gym exercises with guidelines such as 3 sets of 10-12 reps per exercise. For each, offer detailed instructions and on a new line include a bold "Primary muscles worked:" line.
+   - **Rest & Cool-Down:** Offer a 1-2 minute recovery period and a 4-minute cool-down with focus on key muscle groups used.
+   - **Motivational Tip:** Add a brief inspiring note like "Push through with proper form—consistency is key."
+
+3. IF the time commitment is "30-45 minutes":
+   - **Warm-Up (5 minutes):** Offer a thorough warm-up incorporating gym-specific dynamic movements (e.g., light treadmill, dynamic stretching).
+   - **Main Circuit (2 circuits):** Generate 3-4 gym exercises per circuit. Instead of time-based, specify a rep/set scheme (for example, 3 sets of 12 reps). Include detailed form instructions and a separate bolded line stating "Primary muscles worked:" for each exercise.
+   - **Rest & Cool-Down:** Between circuits, suggest a 1-2 minute active recovery. Conclude with a 5-minute cool-down explaining the benefits of each static stretch.
+   - **Progressive Guidance:** Advise on gradual weight increases and modifications tailored to the user's fitness level.
+   - **Safety & Form Tips:** Offer reminders for proper form and controlled movements.
+
+4. IF the time commitment is "45-60 minutes":
+   - **Warm-Up (6 minutes):** Provide an extended warm-up suited for intensive gym sessions (e.g., a mix of cardio and dynamic stretches).
+   - **Main Circuit (3 circuits):** Create 3 circuits with 3-4 exercises each, using a rep/set format (e.g., 3 sets of 12-15 reps). Ensure each exercise includes detailed form instructions plus a new line in bold stating "Primary muscles worked:" along with the target areas.
+   - **Rest & Cool-Down:** Recommend 1-2 minute rest periods with suggestions like foam rolling or controlled breathing, followed by a 6-minute cool-down stretching session.
+   - **Safety & Progressive Overload:** Encourage progressive overload for users with advanced levels and provide clear modifications for beginners.
+   - **Motivational & Recovery Note:** End with an encouraging note such as "Excellent work! Remember, proper recovery is as important as the workout itself."
+
+`;
+  }
+
+  // End the prompt by specifying output format.
+  dynamicPrompt += `
+Return ONLY a valid JSON object EXACTLY in the following format, with no extra text or markdown:
+{
+  "Monday": {
+    "warmUp": "<Your warm-up instructions with <br> for line breaks>",
+    "mainCircuit": "<Your main circuit instructions with detailed exercise steps>",
+    "rest": "<Your rest and recovery instructions>",
+    "coolDown": "<Your cool-down instructions>"
+  },
+  "Tuesday": { ... },
+  "Wednesday": { ... },
+  "Thursday": { ... },
+  "Friday": { ... },
+  "Saturday": { ... },
+  "Sunday": "Rest Day: Take a 10-15 minute light walk, perform a gentle yoga sequence, foam rolling, and dynamic stretching. Briefly explain how each activity aids recovery."
+}
+OUTPUT_END
+`;
+
+  console.log("Dynamic Workout Prompt Sent to OpenAI:", dynamicPrompt);
+
+  try {
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: dynamicPrompt }],
+        temperature: 0.4, // Slightly increased for more variation
+        max_tokens: 2000,
+        stop: ["OUTPUT_END"]
+      })
+    });
+    const apiResult = await aiResponse.json();
+    console.log("Raw API JSON Response:", JSON.stringify(apiResult, null, 2));
+    if (!apiResult.choices || !apiResult.choices[0] || !apiResult.choices[0].message) {
+      return res.status(500).json({ workout: null, error: "Unexpected API response format." });
+    }
+    if (apiResult.choices[0].finish_reason === "length") {
+      console.warn("API response was truncated due to token limits.");
+      return res.status(500).json({ workout: null, error: "Workout output truncated. Please try again with a shorter prompt." });
+    }
+    
+    let workoutText = apiResult.choices[0].message.content.trim();
+    console.log("Raw workoutText received:", workoutText);
+    
+    // Remove markdown code fences if present.
+    if (workoutText.startsWith("```")) {
+      workoutText = workoutText.replace(/^```(json)?\s*/i, "").replace(/\s*```$/, "").trim();
+      console.log("WorkoutText after removing markdown delimiters:", workoutText);
+    }
+    
+    // Trim extraneous text before and after the JSON block.
+    const firstBrace = workoutText.indexOf("{");
+    if (firstBrace > 0) {
+      workoutText = workoutText.substring(firstBrace);
+      console.log("WorkoutText after trimming extra text before JSON:", workoutText);
+    }
+    const lastBrace = workoutText.lastIndexOf("}");
+    if (lastBrace < workoutText.length - 1) {
+      workoutText = workoutText.substring(0, lastBrace + 1);
+      console.log("WorkoutText after trimming extra text after JSON:", workoutText);
+    }
+    
+    // Remove the OUTPUT_END marker if present.
+    workoutText = workoutText.replace(/OUTPUT_END\s*$/i, "").trim();
+    
+    // Use regex to extract a JSON block.
+    const jsonMatch = workoutText.match(/{[\s\S]*}/);
+    if (!jsonMatch) {
+      console.error("Regex failed to extract JSON. Full workoutText:", workoutText);
+      return res.status(500).json({ workout: null, error: "Invalid workout format received from server." });
+    }
+    workoutText = jsonMatch[0];
+    console.log("Extracted JSON using regex:", workoutText);
+    
+    // Cleanup: remove BOM, fix trailing commas, and balance braces.
+    workoutText = workoutText.replace(/^\uFEFF/, "").trim();
+    workoutText = workoutText.replace(/,(\s*})/g, "$1");
+    if (workoutText.slice(-1) !== "}") {
+      workoutText += "}";
+      console.log("Appended missing closing brace. New workoutText:", workoutText);
+    }
+    workoutText = balanceBraces(workoutText);
+    console.log("Cleaned workoutText after balancing, first 50 chars:", workoutText.slice(0, 50), "...", "last 50 chars:", workoutText.slice(-50));
+    
+    let workoutPlan;
+    try {
+      workoutPlan = JSON.parse(workoutText);
+      console.log("Parsed workoutPlan object:", workoutPlan);
+    } catch (e) {
+      console.error("Error parsing workout JSON:", e);
+      return res.status(500).json({ workout: null, error: "Invalid workout format received from server." });
+    }
+    
+    // Build an HTML table to display the 7-day workout plan.
+    let tableRows = "";
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    dayNames.forEach(day => {
+      let dayContent = "";
+      if (workoutPlan[day] && typeof workoutPlan[day] === "object") {
+        dayContent += workoutPlan[day].warmUp + "<br><br>";
+        dayContent += workoutPlan[day].mainCircuit + "<br><br>";
+        dayContent += workoutPlan[day].rest + "<br><br>";
+        dayContent += workoutPlan[day].coolDown;
+      } else if (workoutPlan[day]) {
+        dayContent = workoutPlan[day];
+      } else {
+        dayContent = "No workout data.";
+      }
+      tableRows += `<tr>
+        <td style="padding:8px; border:1px solid #ccc;">${day}</td>
+        <td style="padding:8px; border:1px solid #ccc;">${dayContent}</td>
+      </tr>`;
+    });
+    
+    // Updated header, footer, and meal plan button in final output.
+    const tableHTML = compressHTML(`
+      <div class="workout-heading">Your 7-day Workout Plan for Weight Loss</div>
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="padding:8px; border:1px solid #ccc;">Day</th>
+            <th style="padding:8px; border:1px solid #ccc;">Plan</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+      <div class="workout-footer">Good luck!</div>
+      <div style="text-align:center; margin:20px 0;">
+        <button id="generateMealPlan" class="meal-plan-btn">Generate Meal Plan</button>
+      </div>
+    `);
+    console.log("Final HTML being sent to the client:", tableHTML);
+    
+    // Build the extra guidance block only once.
+    let extraGuidance = `<div class="extra-guidance">`;
+    extraGuidance += `<p><strong>Workout Tip:</strong> For maximum benefit, perform the main circuit <strong>2 times</strong>. Beginners can start with one circuit and progress gradually.</p>`;
+    let typeLower = userProfileData.workoutType.toLowerCase();
+    if (typeLower === "home" || typeLower === "bodyweight") {
+      extraGuidance += `<p><strong>Home/Bodyweight Workouts:</strong> This plan is designed as a Tabata-style, time-based workout. Focus on intensity and correct form using your bodyweight or available equipment.</p>`;
+    } else if (typeLower === "gym") {
+      extraGuidance += `<p><strong>Gym Workouts:</strong> This plan is structured with reps and sets. Focus on proper form and progression with the recommended exercises. Use the provided rep/set scheme and allow proper rest between circuits.</p>`;
+    }
+    if (userProfileData.timeCommitment) {
+      let commitment = userProfileData.timeCommitment;
+      extraGuidance += `<p><strong>Session Duration & Frequency:</strong> You selected ${commitment}. `;
+      if (commitment.includes("10-20")) {
+        extraGuidance += `We recommend 1 circuit as detailed above.`;
+      } else if (commitment.includes("20-30")) {
+        extraGuidance += `Aim for 1 circuit with slightly longer exercise durations.`;
+      } else if (commitment.includes("30-45")) {
+        extraGuidance += `This plan includes 2 circuits for a balanced workout.`;
+      } else if (commitment.includes("45-60")) {
+        extraGuidance += `With more available time, 3 circuits will deliver excellent results.`;
+      }
+      extraGuidance += `</p>`;
+    }
+    if (userProfileData.fitnessLevel) {
+      let level = userProfileData.fitnessLevel.toLowerCase();
+      if (level === "beginner") {
+        extraGuidance += `<p><strong>Intensity:</strong> As a beginner, expect moderate intensity with simpler exercise variations.</p>`;
+      } else if (level === "intermediate") {
+        extraGuidance += `<p><strong>Intensity:</strong> Your workouts will be moderately challenging. You can push a bit harder as you build consistency.</p>`;
+      } else if (level === "advanced") {
+        extraGuidance += `<p><strong>Intensity:</strong> High intensity is incorporated to push your limits while emphasizing proper form to avoid injury.</p>`;
+      }
+    }
+    if (userProfileData.equipment && userProfileData.equipment.length > 0) {
+      extraGuidance += `<p><strong>Equipment Note:</strong> You selected: ${userProfileData.equipment.join(", ")}. Use these tools to further customize your routine.</p>`;
+    } else {
+      extraGuidance += `<p><strong>Home Workout Advantage:</strong> This plan emphasizes effective bodyweight exercises that require no additional equipment.</p>`;
+    }
+    if (userProfileData.fitnessGoal) {
+      extraGuidance += `<p><strong>Your Goal:</strong> This plan is tailored to help you ${userProfileData.fitnessGoal}. Consistency and safety are key to progress.</p>`;
+    }
+    extraGuidance += `</div>`;
+    
+    // Prepend the extra guidance block above the table.
+    res.json({ workout: extraGuidance + tableHTML, error: null });
+  } catch (error) {
+    console.error("Error Fetching Workout Plan:", error);
+    res.status(500).json({ workout: null, error: "Failed to generate workout. Server-side error." });
+  }
+});
+
+module.exports = router;

@@ -1,0 +1,276 @@
+from terminal:
+(base) zhanibekotetileu@MacBookPro ai-fitness-app % node server.js
+Server running on http://localhost:3000
+User goals received: have a busy office job and I need to fit workouts to my schedule
+Workout Prompt Sent to OpenAI: Generate a personalized workout plan based on the following details:
+    - Gender: male
+    - Age: 32
+    - Weight: 78 kg
+    - Height: 175 cm
+    - Fitness Goal: loseWeight
+    - Weight Goal: 71
+    - Workout Type: bodyweight
+    Ensure the plan includes daily routines with clear instructions for each exercise.
+Raw API Response: {
+  "id": "chatcmpl-BMT6MqYut2S2TmBIaJxuv94YPGN4w",
+  "object": "chat.completion",
+  "created": 1744694782,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here is a personalized bodyweight workout plan for you to help achieve your weight loss goal:\n\nMonday:\n1. Warm up: 5 minutes of jumping jacks\n2. Push-ups: 3 sets of 12 reps\n3. Bodyweight squats: 3 sets of 15 reps\n4. Plank: 3 sets of 30 seconds\n5. Mountain climbers: 3 sets of 20 reps\n\nTuesday:\n1. Warm up: 5 minutes of high knees\n2. Lunges: 3 sets of 12 reps per leg\n3. Burpees: 3 sets of 10 reps\n4. Russian twists: 3 sets of 20 reps\n5. Bicycle crunches: 3 sets of 15 reps per side\n\nWednesday:\nRest day or light cardio (e.g. jogging, cycling, swimming)\n\nThursday:\n1. Warm up: 5 minutes of butt kicks\n2. Tricep dips: 3 sets of 12 reps\n3. Jump squats: 3 sets of 10 reps\n4. Plank with shoulder taps: 3 sets of 12 reps per side\n5. Leg raises: 3 sets of 15 reps\n\nFriday:\n1. Warm up: 5 minutes of jump rope\n2. Pull-ups or inverted rows: 3 sets of 8 reps\n3. Walking lunges: 3 sets of 20 reps\n4. Side plank: 3 sets of 30 seconds per side\n5. Bicycle crunches: 3 sets of 20 reps\n\nSaturday:\nRest day or light cardio\n\nSunday:\n1. Warm up: 5 minutes of jogging in place\n2. Push-ups: 3 sets of 15 reps\n3. Squat jumps: 3 sets of 15 reps\n4. Russian twists: 3 sets of 20 reps\n5. Leg raises: 3 sets of 15 reps\n\nRemember to maintain a healthy diet and stay hydrated throughout the week. It's also important to listen to your body and rest when needed. Good luck on your weight loss journey!",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 85,
+    "completion_tokens": 434,
+    "total_tokens": 519,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+
+Generated Workout Plan: Here is a personalized bodyweight workout plan for you to help achieve your weight loss goal:
+
+Monday:
+1. Warm up: 5 minutes of jumping jacks
+2. Push-ups: 3 sets of 12 reps
+3. Bodyweight squats: 3 sets of 15 reps
+4. Plank: 3 sets of 30 seconds
+5. Mountain climbers: 3 sets of 20 reps
+
+Tuesday:
+1. Warm up: 5 minutes of high knees
+2. Lunges: 3 sets of 12 reps per leg
+3. Burpees: 3 sets of 10 reps
+4. Russian twists: 3 sets of 20 reps
+5. Bicycle crunches: 3 sets of 15 reps per side
+
+Wednesday:
+Rest day or light cardio (e.g. jogging, cycling, swimming)
+
+Thursday:
+1. Warm up: 5 minutes of butt kicks
+2. Tricep dips: 3 sets of 12 reps
+3. Jump squats: 3 sets of 10 reps
+4. Plank with shoulder taps: 3 sets of 12 reps per side
+5. Leg raises: 3 sets of 15 reps
+
+Friday:
+1. Warm up: 5 minutes of jump rope
+2. Pull-ups or inverted rows: 3 sets of 8 reps
+3. Walking lunges: 3 sets of 20 reps
+4. Side plank: 3 sets of 30 seconds per side
+5. Bicycle crunches: 3 sets of 20 reps
+
+Saturday:
+Rest day or light cardio
+
+Sunday:
+1. Warm up: 5 minutes of jogging in place
+2. Push-ups: 3 sets of 15 reps
+3. Squat jumps: 3 sets of 15 reps
+4. Russian twists: 3 sets of 20 reps
+5. Leg raises: 3 sets of 15 reps
+
+Remember to maintain a healthy diet and stay hydrated throughout the week. It's also important to listen to your body and rest when needed. Good luck on your weight loss journey!
+Received Meal Preferences: {
+  dietStyle: 'general',
+  allergies: 'none',
+  lactoseIntolerant: false,
+  additionalComments: ''
+}
+Meal Plan Prompt Sent to OpenAI: Generate a personalized weekly meal plan based on the following details:
+    - Dietary Preferences: general
+    - Allergies: none
+    - Lactose Intolerant: No
+    - Additional Comments: No additional comments provided
+    
+PLEASE RETURN YOUR RESPONSE IN EXACTLY TWO SECTIONS:
+Section 1: "Meal Plan:" 
+   Provide a detailed day-by-day meal plan with meal names, recipes, and portion sizes.
+Section 2: "Grocery List:" 
+   Provide a list of all required ingredients, with each item on its own new line.
+Ensure that Section 2 starts with the exact label "Grocery List:".
+
+Full OpenAI Response: {
+  "id": "chatcmpl-BMT6lcT6I58ZU5eHExnkYY4uJf3jx",
+  "object": "chat.completion",
+  "created": 1744694807,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Meal Plan:\nMonday:\n- Breakfast: Greek yogurt with granola and mixed berries\n- Lunch: Turkey avocado wrap with whole wheat tortilla\n- Dinner: Grilled salmon with quinoa and roasted vegetables\n\nTuesday:\n- Breakfast: Scrambled eggs with spinach and whole grain toast\n- Lunch: Quinoa salad with chickpeas, cucumbers, and feta cheese\n- Dinner: Baked chicken breast with sweet potato and steamed broccoli\n\nWednesday:\n- Breakfast: Oatmeal with almond butter and sliced bananas\n- Lunch: Lentil soup with a side of mixed greens salad\n- Dinner: Stir-fried tofu with bell peppers and brown rice\n\nThursday:\n- Breakfast: Smoothie with spinach, banana, almond milk, and protein powder\n- Lunch: Grilled chicken Caesar salad with whole grain croutons\n- Dinner: Shrimp stir-fry with snow peas and quinoa\n\nFriday:\n- Breakfast: Whole grain pancakes with maple syrup and fresh fruit\n- Lunch: Turkey and avocado sandwich on whole grain bread\n- Dinner: Baked salmon with asparagus and wild rice\n\nSaturday:\n- Breakfast: Veggie omelette with mushrooms, peppers, and onions\n- Lunch: Quinoa and black bean bowl with salsa and avocado\n- Dinner: Beef stir-fry with broccoli and brown rice\n\nSunday:\n- Breakfast: Chia seed pudding with almond milk and berries\n- Lunch: Caprese salad with tomatoes, mozzarella, and basil\n- Dinner: Grilled shrimp skewers with zucchini noodles and pesto\n\nGrocery List:\n- Greek yogurt\n- Granola\n- Mixed berries\n- Turkey slices\n- Avocado\n- Whole wheat tortillas\n- Salmon fillets\n- Quinoa\n- Assorted vegetables for roasting\n- Eggs\n- Spinach\n- Whole grain bread\n- Chickpeas\n- Cucumbers\n- Feta cheese\n- Chicken breast\n- Sweet potatoes\n- Broccoli\n- Oatmeal\n- Almond butter\n- Bananas\n- Lentils\n- Mixed greens\n- Tofu\n- Bell peppers\n- Brown rice\n- Protein powder\n- Almond milk\n- Smoothie ingredients (spinach, banana)\n- Caesar salad ingredients (grilled chicken, romaine lettuce, whole grain croutons)\n- Shrimp\n- Snow peas\n- Whole grain pancake mix\n- Maple syrup\n- Fresh fruit\n- Mushrooms\n- Black beans\n- Salsa\n- Beef strips\n- Zucchini\n- Chia seeds\n- Mozzarella cheese\n- Basil\n- Shrimp skewers\n- Pesto sauce",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 139,
+    "completion_tokens": 543,
+    "total_tokens": 682,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+Extracted Meal Plan: Meal Plan:
+Monday:
+- Breakfast: Greek yogurt with granola and mixed berries
+- Lunch: Turkey avocado wrap with whole wheat tortilla
+- Dinner: Grilled salmon with quinoa and roasted vegetables
+
+Tuesday:
+- Breakfast: Scrambled eggs with spinach and whole grain toast
+- Lunch: Quinoa salad with chickpeas, cucumbers, and feta cheese
+- Dinner: Baked chicken breast with sweet potato and steamed broccoli
+
+Wednesday:
+- Breakfast: Oatmeal with almond butter and sliced bananas
+- Lunch: Lentil soup with a side of mixed greens salad
+- Dinner: Stir-fried tofu with bell peppers and brown rice
+
+Thursday:
+- Breakfast: Smoothie with spinach, banana, almond milk, and protein powder
+- Lunch: Grilled chicken Caesar salad with whole grain croutons
+- Dinner: Shrimp stir-fry with snow peas and quinoa
+
+Friday:
+- Breakfast: Whole grain pancakes with maple syrup and fresh fruit
+- Lunch: Turkey and avocado sandwich on whole grain bread
+- Dinner: Baked salmon with asparagus and wild rice
+
+Saturday:
+- Breakfast: Veggie omelette with mushrooms, peppers, and onions
+- Lunch: Quinoa and black bean bowl with salsa and avocado
+- Dinner: Beef stir-fry with broccoli and brown rice
+
+Sunday:
+- Breakfast: Chia seed pudding with almond milk and berries
+- Lunch: Caprese salad with tomatoes, mozzarella, and basil
+- Dinner: Grilled shrimp skewers with zucchini noodles and pesto
+
+Grocery List:
+- Greek yogurt
+- Granola
+- Mixed berries
+- Turkey slices
+- Avocado
+- Whole wheat tortillas
+- Salmon fillets
+- Quinoa
+- Assorted vegetables for roasting
+- Eggs
+- Spinach
+- Whole grain bread
+- Chickpeas
+- Cucumbers
+- Feta cheese
+- Chicken breast
+- Sweet potatoes
+- Broccoli
+- Oatmeal
+- Almond butter
+- Bananas
+- Lentils
+- Mixed greens
+- Tofu
+- Bell peppers
+- Brown rice
+- Protein powder
+- Almond milk
+- Smoothie ingredients (spinach, banana)
+- Caesar salad ingredients (grilled chicken, romaine lettuce, whole grain croutons)
+- Shrimp
+- Snow peas
+- Whole grain pancake mix
+- Maple syrup
+- Fresh fruit
+- Mushrooms
+- Black beans
+- Salsa
+- Beef strips
+- Zucchini
+- Chia seeds
+- Mozzarella cheese
+- Basil
+- Shrimp skewers
+- Pesto sauce
+Extracted Grocery List: - Greek yogurt
+- Granola
+- Mixed berries
+- Turkey slices
+- Avocado
+- Whole wheat tortillas
+- Salmon fillets
+- Quinoa
+- Assorted vegetables for roasting
+- Eggs
+- Spinach
+- Whole grain bread
+- Chickpeas
+- Cucumbers
+- Feta cheese
+- Chicken breast
+- Sweet potatoes
+- Broccoli
+- Oatmeal
+- Almond butter
+- Bananas
+- Lentils
+- Mixed greens
+- Tofu
+- Bell peppers
+- Brown rice
+- Protein powder
+- Almond milk
+- Smoothie ingredients (spinach, banana)
+- Caesar salad ingredients (grilled chicken, romaine lettuce, whole grain croutons)
+- Shrimp
+- Snow peas
+- Whole grain pancake mix
+- Maple syrup
+- Fresh fruit
+- Mushrooms
+- Black beans
+- Salsa
+- Beef strips
+- Zucchini
+- Chia seeds
+- Mozzarella cheese
+- Basil
+- Shrimp skewers
+- Pesto sauce

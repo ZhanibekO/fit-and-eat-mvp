@@ -1,0 +1,305 @@
+// workout.js
+
+// Load environment variables from the .env file
+require("dotenv").config();
+
+const express = require("express");
+const fetch = require("node-fetch");
+const router = express.Router();
+
+// Ensure OPENAI_API_KEY is defined.
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  console.error("Error: OPENAI_API_KEY is not defined. Please set it in your .env file.");
+  process.exit(1);
+}
+
+/* ===================== */
+/* NUTRITION CALCULATIONS */
+/* ===================== */
+function calculateCalorieTarget(profile) {
+  let weight = parseFloat(profile.weight);
+  let height = parseFloat(profile.height);
+  let age = parseInt(profile.age);
+  if (isNaN(weight) || isNaN(height) || isNaN(age)) return 1650;
+  
+  let bmr =
+    profile.gender && profile.gender.toLowerCase() === "male"
+      ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+      : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  let activityFactor = 1.2;
+  if (profile.activityLevel) {
+    let level = profile.activityLevel.toLowerCase();
+    if (level.includes("moderately")) {
+      activityFactor = 1.55;
+    } else if (level.includes("very")) {
+      activityFactor = 1.725;
+    }
+  }
+  let tdee = bmr * activityFactor;
+  if (profile.fitnessGoal) {
+    let goal = profile.fitnessGoal.toLowerCase();
+    if (goal === "loseweight") tdee *= 0.85;
+    else if (goal === "gainmuscle") tdee *= 1.10;
+  }
+  return Math.round(tdee);
+}
+
+function calculateMacros(calories) {
+  const protein = Math.round((calories * 0.30) / 4);
+  const carbs = Math.round((calories * 0.40) / 4);
+  const fat = Math.round((calories * 0.30) / 9);
+  return { protein, carbs, fat };
+}
+
+/* ===================== */
+/* WORKOUT FORMATTING    */
+/* ===================== */
+function getExerciseDuration(exerciseLine) {
+  const match = exerciseLine.match(/(\d+\s*(minutes|minute|seconds|second))/i);
+  return match ? match[0] : null;
+}
+
+function reformatCircuitWorkout(rawText) {
+  rawText = rawText
+    .replace(/Here is your personalized 7[-\s]?day workout plan for weight loss[:\s]*/gi, "")
+    .replace(/\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday):/gi, "")
+    .trim();
+  let segments = rawText.split(/<br>|[\r\n]+/).map(s => s.trim()).filter(s => s.length > 0);
+  segments = segments.filter(seg => {
+    if (seg.length < 20 && /^\d+\s*minute/i.test(seg)) return false;
+    if (/between exercises/i.test(seg) || /after completing/i.test(seg)) return false;
+    return true;
+  });
+  if (segments.length === 0) return rawText;
+  let items = [];
+  let warmUp = segments[0];
+  if (!/^warm[-\s]?up:/i.test(warmUp)) warmUp = "Warm-Up: " + warmUp;
+  items.push(warmUp);
+  for (let i = 1; i < segments.length; i++) {
+    let step = segments[i]
+      .replace(/^[\-\*\d\.\s]+/, "")
+      .replace(/^(Main Circuit:|Rest:|Cool[-\s]?Down:)/i, "")
+      .trim();
+    if (!/[a-zA-Z]/.test(step)) continue;
+    if (!/rest\s*-?\s*1 minute/i.test(step)) step += " , rest - 1 minute";
+    items.push(step);
+  }
+  // Use unordered list (<ul>) to avoid numeric markers.
+  let formatted = "<ul>";
+  items.forEach(item => { formatted += `<li>${item}</li>`; });
+  formatted += "</ul>";
+  return formatted;
+}
+
+/* ===================== */
+/* COMPRESS HTML STRING  */
+/* ===================== */
+function compressHTML(html) {
+  return html.replace(/\n/g, "").replace(/>\s+</g, "><").trim();
+}
+
+/* ===================== */
+/* ROUTE: Generate Workout Plan */
+/* ===================== */
+router.post("/generate-workout", async (req, res) => {
+  const {
+    gender,
+    age,
+    weight,
+    weightUnit,
+    height,
+    heightUnit,
+    fitnessGoal,
+    goalWeight,
+    workoutType,
+    fitnessLevel,
+    timeCommitment,
+    activityLevel,
+    equipment,
+    specificGoals
+  } = req.body;
+
+  const tdee = weight && height && age && activityLevel
+    ? calculateCalorieTarget({ gender, weight, height, age, activityLevel, fitnessGoal })
+    : 1650;
+  const macros = calculateMacros(tdee);
+  const nutritionSummaryMessage = fitnessGoal && macros
+    ? `Based on your fitness goals, your daily target is approximately ${tdee} calories per day. This includes around ${macros.protein}g protein, ${macros.carbs}g carbohydrates, and ${macros.fat}g fat to fuel your workouts and support ${fitnessGoal === "loseWeight" ? "weight loss" : fitnessGoal === "gainMuscle" ? "muscle building" : "overall fitness"}.`
+    : "Based on your fitness goals, this personalized plan is designed to meet your nutritional needs.";
+
+  const lowerWorkoutType = workoutType ? workoutType.toLowerCase() : "";
+  let dynamicWorkoutInstructions = "";
+  if (lowerWorkoutType.includes("gym")) {
+    dynamicWorkoutInstructions = "For gym workouts, provide a detailed rep and set-based plan that utilizes the available equipment optimally, specifying reps, sets, and rest intervals for each exercise.";
+  } else {
+    dynamicWorkoutInstructions = "For home and bodyweight workouts, provide a Tabata-style, time-based circuit training plan with specific exercise durations (e.g., 45 seconds per exercise) and rest intervals, incorporating any available equipment if provided.";
+  }
+
+  let additionalGoalInstructions = "";
+  if (specificGoals && specificGoals.trim().length > 0) {
+    additionalGoalInstructions = `Additionally, target the following goals: ${specificGoals}. Include exercises that focus on these areas (e.g., core work for abs, compound lower-body movements for toned legs).`;
+  }
+
+  // Build a concise prompt with a clear instruction to return only JSON (with OUTPUT_END appended).
+  const workoutPrompt = `Generate a personalized 7-day workout plan for weight loss using the details below:
+- Gender: ${gender || "not provided"}
+- Age: ${age || "not provided"}
+- Current Weight: ${weight || "not provided"} ${weightUnit || ""}
+- Height: ${height || "not provided"} ${heightUnit || ""}
+- Fitness Goal: ${fitnessGoal || "not provided"}
+- Target Weight: ${goalWeight || "not specified"}
+- Workout Type: ${workoutType || "not specified"}
+- Fitness Level: ${fitnessLevel || "not provided"}
+- Time Commitment: ${timeCommitment || "not provided"}
+- Activity Level: ${activityLevel || "not provided"}
+- Equipment: ${equipment && equipment.length ? equipment.join(", ") : "none"}
+- Specific Goals: ${specificGoals || "none"}
+- Rest Preference: Sunday is a full rest day.
+${nutritionSummaryMessage}
+${dynamicWorkoutInstructions}
+${additionalGoalInstructions}
+Return only a valid JSON object in the following format (append OUTPUT_END at the end):
+{
+  "Monday": {
+    "warmUp": "A 5-minute warm-up description",
+    "mainCircuit": [
+      "Exercise 1 – duration",
+      "Exercise 2 – duration",
+      "Exercise 3 – duration"
+    ],
+    "rest": "Rest instructions (e.g., '1 minute between exercises, 2 minutes after the circuit')",
+    "coolDown": "A 5-minute cool-down description"
+  },
+  "Tuesday": { ... },
+  ...,
+  "Saturday": { ... },
+  "Sunday": "Rest Day"
+}
+OUTPUT_END`;
+
+  try {
+    console.log("Workout Prompt Sent to OpenAI:", workoutPrompt);
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+         "Content-Type": "application/json",
+         "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+         model: "gpt-3.5-turbo",
+         messages: [{ role: "user", content: workoutPrompt }],
+         temperature: 0.3,
+         max_tokens: 2500,
+         stop: ["OUTPUT_END"]
+      })
+    });
+
+    // Get the raw API response text.
+    const responseText = await aiResponse.text();
+    console.log("Raw API Response:", responseText);
+
+    // Remove the OUTPUT_END marker and trim whitespace.
+    let workoutText = responseText.trim().replace(/OUTPUT_END\s*$/i, "").trim();
+
+    // Extract the JSON portion using a regex.
+    const jsonMatch = workoutText.match(/{[\s\S]*}/);
+    if (jsonMatch) {
+      workoutText = jsonMatch[0];
+      console.log("Cleaned workoutText:", workoutText);
+      console.log("Cleaned workoutText length:", workoutText.length, "Last character:", workoutText.slice(-1));
+      // Remove any trailing commas before the closing brace.
+      workoutText = workoutText.replace(/,(\s*})/g, "$1");
+      console.log("Final workoutText after trailing comma fix:", workoutText);
+      // If it doesn't end with "}", append one.
+      if (workoutText.slice(-1) !== "}") {
+        workoutText += "}";
+        console.log("Appended missing closing brace. Final workoutText:", workoutText);
+      }
+    } else {
+      console.error("Failed to extract JSON from the workout response.");
+      return res.status(500).json({ workout: null, error: "Invalid workout format received from server." });
+    }
+
+    let workoutPlan;
+    try {
+      workoutPlan = JSON.parse(workoutText);
+      console.log("Parsed workoutPlan object:", workoutPlan);
+    } catch (e) {
+      console.error("Error parsing workout JSON:", e);
+      return res.status(500).json({ workout: null, error: "Invalid workout format received from server." });
+    }
+
+    // Build an HTML table from workoutPlan.
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    let tableRows = "";
+    dayNames.forEach(day => {
+      let dayContent = "";
+      if (typeof workoutPlan[day] === "object") {
+        dayContent += `<strong>Warm-Up:</strong> ${workoutPlan[day].warmUp}<br>`;
+        dayContent += `<strong>Main Circuit:</strong><br><ul>`;
+        workoutPlan[day].mainCircuit.forEach(exercise => {
+          dayContent += `<li>${exercise}</li>`;
+        });
+        dayContent += `</ul>`;
+        dayContent += `<strong>Rest:</strong> ${workoutPlan[day].rest}<br>`;
+        dayContent += `<strong>Cool-Down:</strong> ${workoutPlan[day].coolDown}`;
+      } else {
+        dayContent = workoutPlan[day];
+      }
+      tableRows += `<tr>
+        <td style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#34495e; font-weight:bold;">${day}</td>
+        <td style="padding:8px; border:1px solid #ccc; color:#333;">${dayContent}</td>
+      </tr>`;
+    });
+
+    const workoutInstructions = `<div style="text-align:center; font-size:1rem; color:#34495e; margin:10px 0;">
+<strong>Workout Instructions:</strong><br>
+1. This is a circuit-style bodyweight workout that consists of 3 rounds.<br>
+2. Rest 1 minute between exercises and 2 minutes after completing one round.<br>
+3. Cool down and stretch for 5 minutes after completing all three rounds.
+</div>`;
+
+    const headerText = `<p style="text-align:center; color:#34495e; font-size:1.2rem;">
+Here is your personalized 7 day workout plan for weight loss.
+</p>`;
+    const finalMessage = `<p style="text-align:center; color:#34495e; font-size:1rem;">
+This workout is not a race—go at a pace that suits your fitness level.
+Remember to warm up before each workout and cool down afterwards.
+Stay hydrated and listen to your body. As you progress, increase time or difficulty gradually.
+Good luck on your weight loss journey!
+</p>`;
+
+let tableHTML = `
+${workoutInstructions}
+${headerText}
+<table class="workout-table">
+  <thead>
+    <tr>
+      <th>Day</th>
+      <th>Exercise Routine</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${tableRows}
+  </tbody>
+</table>
+${finalMessage}
+<div style="text-align:center; margin-top:20px;">
+  <button id="generateMealPlan" class="meal-plan-btn">Generate Custom Meal Plan</button>
+</div>
+`;
+tableHTML = compressHTML(tableHTML);
+console.log("Final Workout Table HTML:", tableHTML);
+
+// Extra logging just before sending the response.
+console.log("Final HTML being sent to the client:", tableHTML);
+
+res.json({ workout: tableHTML, error: null });
+  } catch (error) {
+    console.error("Error Fetching Workout Plan:", error);
+    res.status(500).json({ workout: null, error: "Failed to generate workout. Server-side error." });
+  }
+});
+
+module.exports = router;

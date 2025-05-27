@@ -1,0 +1,526 @@
+/* ===================== */
+/* CSS VARIABLES & GLOBAL RESET */
+/* ===================== */
+:root {
+  --font-family: 'Open Sans', sans-serif;
+  --primary-color: #34495e;
+  --secondary-color: #1e90ff;
+  --accent-color: #f39c12;
+  --background-color: #f5f8fa;
+  --dark-background: #2c3e50;
+  --light-background: #ffffff;
+  --text-color: #333;
+  --container-max: 1200px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* ===================== */
+/* CONTAINER */
+/* ===================== */
+.container {
+  width: 90%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ===================== */
+/* HEADER / NAVIGATION */
+/* ===================== */
+.header {
+  background-color: var(--primary-color);
+  color: var(--light-background);
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.header-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.header-nav a {
+  color: var(--light-background);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.header-nav a:hover {
+  color: var(--accent-color);
+}
+
+/* ===================== */
+/* SIDEBAR (LEFT NAVIGATION) */
+/* ===================== */
+.sidebar {
+  background-color: #f7f7f7;
+  padding: 1rem;
+  border-right: 1px solid #ddd;
+  flex: 0 0 250px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 1rem;
+}
+
+.sidebar ul li a {
+  text-decoration: none;
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+/* ===================== */
+/* MAIN CONTENT AREA */
+/* ===================== */
+.main-content {
+  flex: 1;
+  padding: 1rem;
+}
+
+/* ===================== */
+/* FOOTER */
+/* ===================== */
+.footer {
+  background-color: var(--primary-color);
+  color: var(--light-background);
+  text-align: center;
+  padding: 1rem;
+}
+
+/* ===================== */
+/* APP LAYOUT WRAPPER */
+/* ===================== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+}
+
+/* ===================== */
+/* HERO SECTION */
+/* ===================== */
+.hero {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(30,144,255,0.8), rgba(30,144,255,0.5)),
+    url('https://via.placeholder.com/1920x1080?text=Fitness+Background')
+    no-repeat center center/cover;
+  color: #fff;
+}
+
+.hero h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  max-width: 1000px;
+}
+
+/* ===================== */
+/* INPUT GROUP */
+/* ===================== */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-group input[type="text"] {
+  padding: 12px;
+  width: 100%;
+  max-width: 800px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  outline: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.input-group button {
+  padding: 15px 28px;
+  background-color: var(--secondary-color);
+  color: var(--light-background);
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%;
+  max-width: 200px;
+  margin-top: 2%;
+}
+
+.input-group button:hover {
+  background-color: #1c86ee;
+  transform: scale(1.02);
+}
+
+/* ===================== */
+/* WARNINGS & DETAILS */
+/* ===================== */
+.warning {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  display: none;
+}
+
+#detailsSection {
+  display: none;
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+#detailsSection.visible {
+  display: block;
+}
+
+#detailsSection h2 {
+  color: var(--primary-color) !important;
+}
+
+/* ===================== */
+/* BLUE BOX */
+/* ===================== */
+.blue-box {
+  background-color: #e0f7fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.blue-box h2 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  color: #00796b;
+}
+
+/* ===================== */
+/* FORM GROUP (WORKOUT & DETAILS) */
+/* ===================== */
+.form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #34495e;
+  width: 140px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #b2dfdb;
+  border-radius: 5px;
+}
+
+/* ===================== */
+/* INPUT WRAPPER */
+/* ===================== */
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-wrapper input {
+  flex: 3;
+}
+
+.input-wrapper select {
+  flex: 1;
+}
+
+/* ===================== */
+/* MEAL PLAN FIELDS */
+/* ===================== */
+.meal-plan-preferences {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border: 1px solid #b2dfdb;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.meal-plan-preferences h3 {
+  margin-top: 0;
+  color: #34495e;
+}
+
+.meal-plan-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.meal-plan-field label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #34495e;
+  width: 140px;
+}
+
+.meal-plan-field input,
+.meal-plan-field select,
+.meal-plan-field textarea {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #b2dfdb;
+  border-radius: 5px;
+}
+
+/* ===================== */
+/* FEATURE CARDS */
+/* ===================== */
+.card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px;
+  background-color: var(--light-background);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.card h3 {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin: 10px 0;
+}
+
+.card p {
+  color: #2c3e50;
+}
+
+/* ===================== */
+/* TABLE STYLING */
+/* ===================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: var(--light-background);
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+table thead th {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+table tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table td {
+  padding: 8px;
+  vertical-align: top;
+  white-space: pre-wrap;
+  border: 1px solid #ccc;
+}
+
+table ul {
+  list-style-type: none;
+  margin: 0;
+  padding-left: 20px;
+}
+
+/* ===================== */
+/* BUTTON STYLING */
+/* ===================== */
+.meal-plan-btn,
+#generateWorkout {
+  padding: 12px 28px;
+  background-color: var(--secondary-color);
+  color: var(--light-background);
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.meal-plan-btn:hover,
+#generateWorkout:hover {
+  background-color: #1c86ee;
+  transform: scale(1.02);
+}
+
+/* ===================== */
+/* RECIPE LINK STYLES */
+/* (No longer needed because recipes are shown as plain text) */
+/* ===================== */
+.recipe-link {
+  text-decoration: none;
+  color: var(--secondary-color);
+  font-weight: bold;
+  cursor: default;
+}
+
+/* ===================== */
+/* EXTRA GUIDANCE STYLES */
+/* ===================== */
+.extra-guidance {
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  padding: 10px;
+}
+
+/* ===================== */
+/* MODAL STYLES */
+/* (Removed modal functionality since we now display recipes directly) */
+/* ===================== */
+
+/* ===================== */
+/* NEW: Unified Containers for Meal Plan & Grocery List */
+/* ===================== */
+.meal-plan-umbrella {
+  background-color: var(--light-background);
+  border: 2px solid var(--secondary-color);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.meal-plan-day {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.meal-plan-day:last-child {
+  border-bottom: none;
+}
+
+.grocery-list-umbrella {
+  background-color: var(--light-background);
+  border: 2px solid var(--secondary-color);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+/* ===================== */
+/* RESPONSIVE DESIGN */
+/* ===================== */
+
+/* Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .navbar-menu {
+    flex-direction: column;
+  }
+  .card {
+    width: 100%;
+  }
+  .content-wrapper {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+}
+
+/* Mobile Devices (max-width: 480px) */
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+  .header,
+  .sidebar,
+  .main-content {
+    padding: 0.5rem;
+  }
+  .header-nav ul {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .logo {
+    font-size: 1.2rem;
+  }
+  .header-nav a,
+  .sidebar ul li a {
+    font-size: 0.9rem;
+  }
+  .main-content {
+    font-size: 0.9rem;
+  }
+}
+
+/* Ultra-wide Screens (min-width: 1600px) */
+@media (min-width: 1600px) {
+  .main-content {
+    max-width: var(--container-max);
+    margin: auto;
+  }
+}

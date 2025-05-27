@@ -1,0 +1,306 @@
+Raw API JSON Response: {
+  "id": "chatcmpl-BZsdJipmFUfZpqcedxf7GZK0vVVh7",
+  "object": "chat.completion",
+  "created": 1747891189,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"Monday\": {\n    \"warmUp\": \"<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.\",\n    \"mainCircuit\": \"<strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.\",\n    \"rest\": \"<strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.\",\n    \"coolDown\": \"<strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.\"\n  },\n  \"Tuesday\": {\n    \"warmUp\": \"<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.\",\n    \"mainCircuit\": \"<strong>Main Circuit (2 circuits):</strong><br><strong>1. Lunges:</strong> Step forward with one leg, lower your body until both knees are at 90-degree angles, then return to standing. Alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>2. Mountain Climbers:</strong> Start in a plank position, drive your knees towards your chest in a running motion. <br><strong>Primary muscles worked:</strong> Core, shoulders, hip flexors.<br><strong>3. Bicycle Crunches:</strong> Lie on your back, bring opposite elbow to knee while extending the other leg. Alternate sides. <br><strong>Primary muscles worked:</strong> Core, obliques.\",\n    \"rest\": \"<strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.\",\n    \"coolDown\": \"<strong>Cool-Down:</strong><br>Stretch your hip flexors, glutes, obliques, and lower back for 5 minutes to promote flexibility and reduce muscle soreness.\"\n  },\n  \"Wednesday\": {\n    \"warmUp\": \"<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping rope<br>- 30 seconds of leg kicks<br>- 30 seconds of shoulder circles<br>These exercises increase heart rate, warm up leg muscles, and loosen shoulder joints.\",\n    \"mainCircuit\": \"<strong>Main Circuit (2 circuits):</strong><br><strong>1. Burpees:</strong> Start standing, squat down, kick feet back into a plank, do a push-up, jump feet back to hands, and jump up explosively. <br><strong>Primary muscles worked:</strong> Full body.<br><strong>2. Russian Twists:</strong> Sit on the floor, lean back slightly, rotate your torso to touch the floor on each side. <br><strong>Primary muscles worked:</strong> Core, obliques.<br><strong>3. Superman Hold:</strong> Lie on your stomach, lift arms and legs off the ground, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Lower back, glutes, shoulders.\",\n    \"rest\": \"<strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.\",\n    \"coolDown\": \"<strong>Cool-Down:</strong><br>Stretch your full body, focusing on the lower back, shoulders, and core, for 5 minutes to improve flexibility and reduce muscle tension.\"\n  },\n  \"Thursday\": {\n    \"warmUp\": \"<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of butt kicks<br>- 30 seconds of arm circles<br>- 30 seconds of torso twists<br>These exercises warm up the legs, shoulders, and core muscles.\",\n    \"mainCircuit\": \"<strong>Main Circuit (2 circuits):</strong><br><strong>1. Plank with Shoulder Taps:</strong> Start in a plank position, tap each shoulder with the opposite hand while engaging the core. <br><strong>Primary muscles worked:</strong> Core, shoulders.<br><strong>2. Jump Squats:</strong> Perform a squat, then explode up into a jump, land softly, and repeat. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.<br><strong>3. Side Plank:</strong> Hold a side plank position on each side for 30 seconds. <br><strong>Primary muscles worked:</strong> Obliques, core, shoulders.\",\n    \"rest\": \"<strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.\",\n    \"coolDown\": \"<strong>Cool-Down:</strong><br>Stretch your core, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.\"\n  },\n  \"Friday\": {\n    \"warmUp\": \"<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.\",\n    \"mainCircuit\": \"<strong>Main Circuit (2 circuits):</strong><br><strong>1. Tricep Dips:</strong> Sit on the edge of a chair, place hands next to hips, lift hips off the chair, bend elbows to lower body, then push back up. <br><strong>Primary muscles worked:</strong> Triceps, shoulders.<br><strong>2. Reverse Lunges:</strong> Step back into a lunge position, return to standing, and alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Wall Sit:</strong> Sit against a wall with knees at a 90-degree angle, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.\",\n    \"rest\": \"<strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.\",\n    \"coolDown\": \"<strong>Cool-Down:</strong><br>Stretch your triceps, quadriceps, hamstrings, and calves for 5 minutes to promote flexibility and reduce muscle soreness.\"\n  },\n  \"Saturday\": {\n    \"warmUp\": \"<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.\",\n    \"mainCircuit\": \"<strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.\",\n    \"rest\": \"<strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.\",\n    \"coolDown\": \"<strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.\"\n  },\n  \"Sunday\": \"<strong>Rest Day:</strong> Take a 10-15 minute light walk, perform a gentle yoga sequence, foam rolling, and dynamic stretching. Briefly explain how each activity aids recovery: A light walk promotes blood flow and reduces muscle stiffness, gentle yoga enhances flexibility and relaxation, foam rolling helps release muscle tension, and dynamic stretching improves range of motion and prevents injury.\"\n}\n",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1507,
+    "completion_tokens": 1968,
+    "total_tokens": 3475,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+Raw workoutText received: {
+  "Monday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery."
+  },
+  "Tuesday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Lunges:</strong> Step forward with one leg, lower your body until both knees are at 90-degree angles, then return to standing. Alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>2. Mountain Climbers:</strong> Start in a plank position, drive your knees towards your chest in a running motion. <br><strong>Primary muscles worked:</strong> Core, shoulders, hip flexors.<br><strong>3. Bicycle Crunches:</strong> Lie on your back, bring opposite elbow to knee while extending the other leg. Alternate sides. <br><strong>Primary muscles worked:</strong> Core, obliques.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your hip flexors, glutes, obliques, and lower back for 5 minutes to promote flexibility and reduce muscle soreness."
+  },
+  "Wednesday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping rope<br>- 30 seconds of leg kicks<br>- 30 seconds of shoulder circles<br>These exercises increase heart rate, warm up leg muscles, and loosen shoulder joints.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Burpees:</strong> Start standing, squat down, kick feet back into a plank, do a push-up, jump feet back to hands, and jump up explosively. <br><strong>Primary muscles worked:</strong> Full body.<br><strong>2. Russian Twists:</strong> Sit on the floor, lean back slightly, rotate your torso to touch the floor on each side. <br><strong>Primary muscles worked:</strong> Core, obliques.<br><strong>3. Superman Hold:</strong> Lie on your stomach, lift arms and legs off the ground, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Lower back, glutes, shoulders.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your full body, focusing on the lower back, shoulders, and core, for 5 minutes to improve flexibility and reduce muscle tension."
+  },
+  "Thursday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of butt kicks<br>- 30 seconds of arm circles<br>- 30 seconds of torso twists<br>These exercises warm up the legs, shoulders, and core muscles.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Plank with Shoulder Taps:</strong> Start in a plank position, tap each shoulder with the opposite hand while engaging the core. <br><strong>Primary muscles worked:</strong> Core, shoulders.<br><strong>2. Jump Squats:</strong> Perform a squat, then explode up into a jump, land softly, and repeat. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.<br><strong>3. Side Plank:</strong> Hold a side plank position on each side for 30 seconds. <br><strong>Primary muscles worked:</strong> Obliques, core, shoulders.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your core, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery."
+  },
+  "Friday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Tricep Dips:</strong> Sit on the edge of a chair, place hands next to hips, lift hips off the chair, bend elbows to lower body, then push back up. <br><strong>Primary muscles worked:</strong> Triceps, shoulders.<br><strong>2. Reverse Lunges:</strong> Step back into a lunge position, return to standing, and alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Wall Sit:</strong> Sit against a wall with knees at a 90-degree angle, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your triceps, quadriceps, hamstrings, and calves for 5 minutes to promote flexibility and reduce muscle soreness."
+  },
+  "Saturday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery."
+  },
+  "Sunday": "<strong>Rest Day:</strong> Take a 10-15 minute light walk, perform a gentle yoga sequence, foam rolling, and dynamic stretching. Briefly explain how each activity aids recovery: A light walk promotes blood flow and reduces muscle stiffness, gentle yoga enhances flexibility and relaxation, foam rolling helps release muscle tension, and dynamic stretching improves range of motion and prevents injury."
+}
+Extracted JSON using regex: {
+  "Monday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery."
+  },
+  "Tuesday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Lunges:</strong> Step forward with one leg, lower your body until both knees are at 90-degree angles, then return to standing. Alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>2. Mountain Climbers:</strong> Start in a plank position, drive your knees towards your chest in a running motion. <br><strong>Primary muscles worked:</strong> Core, shoulders, hip flexors.<br><strong>3. Bicycle Crunches:</strong> Lie on your back, bring opposite elbow to knee while extending the other leg. Alternate sides. <br><strong>Primary muscles worked:</strong> Core, obliques.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your hip flexors, glutes, obliques, and lower back for 5 minutes to promote flexibility and reduce muscle soreness."
+  },
+  "Wednesday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping rope<br>- 30 seconds of leg kicks<br>- 30 seconds of shoulder circles<br>These exercises increase heart rate, warm up leg muscles, and loosen shoulder joints.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Burpees:</strong> Start standing, squat down, kick feet back into a plank, do a push-up, jump feet back to hands, and jump up explosively. <br><strong>Primary muscles worked:</strong> Full body.<br><strong>2. Russian Twists:</strong> Sit on the floor, lean back slightly, rotate your torso to touch the floor on each side. <br><strong>Primary muscles worked:</strong> Core, obliques.<br><strong>3. Superman Hold:</strong> Lie on your stomach, lift arms and legs off the ground, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Lower back, glutes, shoulders.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your full body, focusing on the lower back, shoulders, and core, for 5 minutes to improve flexibility and reduce muscle tension."
+  },
+  "Thursday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of butt kicks<br>- 30 seconds of arm circles<br>- 30 seconds of torso twists<br>These exercises warm up the legs, shoulders, and core muscles.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Plank with Shoulder Taps:</strong> Start in a plank position, tap each shoulder with the opposite hand while engaging the core. <br><strong>Primary muscles worked:</strong> Core, shoulders.<br><strong>2. Jump Squats:</strong> Perform a squat, then explode up into a jump, land softly, and repeat. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.<br><strong>3. Side Plank:</strong> Hold a side plank position on each side for 30 seconds. <br><strong>Primary muscles worked:</strong> Obliques, core, shoulders.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your core, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery."
+  },
+  "Friday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Tricep Dips:</strong> Sit on the edge of a chair, place hands next to hips, lift hips off the chair, bend elbows to lower body, then push back up. <br><strong>Primary muscles worked:</strong> Triceps, shoulders.<br><strong>2. Reverse Lunges:</strong> Step back into a lunge position, return to standing, and alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Wall Sit:</strong> Sit against a wall with knees at a 90-degree angle, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your triceps, quadriceps, hamstrings, and calves for 5 minutes to promote flexibility and reduce muscle soreness."
+  },
+  "Saturday": {
+    "warmUp": "<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.",
+    "mainCircuit": "<strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.",
+    "rest": "<strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.",
+    "coolDown": "<strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery."
+  },
+  "Sunday": "<strong>Rest Day:</strong> Take a 10-15 minute light walk, perform a gentle yoga sequence, foam rolling, and dynamic stretching. Briefly explain how each activity aids recovery: A light walk promotes blood flow and reduces muscle stiffness, gentle yoga enhances flexibility and relaxation, foam rolling helps release muscle tension, and dynamic stretching improves range of motion and prevents injury."
+}
+Cleaned workoutText after balancing, first 50 chars: {
+  "Monday": {
+    "warmUp": "<strong>Warm-Up (5  ... last 50 chars: g improves range of motion and prevents injury."
+}
+Parsed workoutPlan object: {
+  Monday: {
+    warmUp: '<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.',
+    mainCircuit: '<strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.',
+    rest: '<strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.',
+    coolDown: '<strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.'
+  },
+  Tuesday: {
+    warmUp: '<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.',
+    mainCircuit: '<strong>Main Circuit (2 circuits):</strong><br><strong>1. Lunges:</strong> Step forward with one leg, lower your body until both knees are at 90-degree angles, then return to standing. Alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>2. Mountain Climbers:</strong> Start in a plank position, drive your knees towards your chest in a running motion. <br><strong>Primary muscles worked:</strong> Core, shoulders, hip flexors.<br><strong>3. Bicycle Crunches:</strong> Lie on your back, bring opposite elbow to knee while extending the other leg. Alternate sides. <br><strong>Primary muscles worked:</strong> Core, obliques.',
+    rest: '<strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.',
+    coolDown: '<strong>Cool-Down:</strong><br>Stretch your hip flexors, glutes, obliques, and lower back for 5 minutes to promote flexibility and reduce muscle soreness.'
+  },
+  Wednesday: {
+    warmUp: '<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping rope<br>- 30 seconds of leg kicks<br>- 30 seconds of shoulder circles<br>These exercises increase heart rate, warm up leg muscles, and loosen shoulder joints.',
+    mainCircuit: '<strong>Main Circuit (2 circuits):</strong><br><strong>1. Burpees:</strong> Start standing, squat down, kick feet back into a plank, do a push-up, jump feet back to hands, and jump up explosively. <br><strong>Primary muscles worked:</strong> Full body.<br><strong>2. Russian Twists:</strong> Sit on the floor, lean back slightly, rotate your torso to touch the floor on each side. <br><strong>Primary muscles worked:</strong> Core, obliques.<br><strong>3. Superman Hold:</strong> Lie on your stomach, lift arms and legs off the ground, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Lower back, glutes, shoulders.',
+    rest: '<strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.',
+    coolDown: '<strong>Cool-Down:</strong><br>Stretch your full body, focusing on the lower back, shoulders, and core, for 5 minutes to improve flexibility and reduce muscle tension.'
+  },
+  Thursday: {
+    warmUp: '<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of butt kicks<br>- 30 seconds of arm circles<br>- 30 seconds of torso twists<br>These exercises warm up the legs, shoulders, and core muscles.',
+    mainCircuit: '<strong>Main Circuit (2 circuits):</strong><br><strong>1. Plank with Shoulder Taps:</strong> Start in a plank position, tap each shoulder with the opposite hand while engaging the core. <br><strong>Primary muscles worked:</strong> Core, shoulders.<br><strong>2. Jump Squats:</strong> Perform a squat, then explode up into a jump, land softly, and repeat. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.<br><strong>3. Side Plank:</strong> Hold a side plank position on each side for 30 seconds. <br><strong>Primary muscles worked:</strong> Obliques, core, shoulders.',
+    rest: '<strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.',
+    coolDown: '<strong>Cool-Down:</strong><br>Stretch your core, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.'
+  },
+  Friday: {
+    warmUp: '<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.',
+    mainCircuit: '<strong>Main Circuit (2 circuits):</strong><br><strong>1. Tricep Dips:</strong> Sit on the edge of a chair, place hands next to hips, lift hips off the chair, bend elbows to lower body, then push back up. <br><strong>Primary muscles worked:</strong> Triceps, shoulders.<br><strong>2. Reverse Lunges:</strong> Step back into a lunge position, return to standing, and alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Wall Sit:</strong> Sit against a wall with knees at a 90-degree angle, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.',
+    rest: '<strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.',
+    coolDown: '<strong>Cool-Down:</strong><br>Stretch your triceps, quadriceps, hamstrings, and calves for 5 minutes to promote flexibility and reduce muscle soreness.'
+  },
+  Saturday: {
+    warmUp: '<strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.',
+    mainCircuit: '<strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.',
+    rest: '<strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.',
+    coolDown: '<strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.'
+  },
+  Sunday: '<strong>Rest Day:</strong> Take a 10-15 minute light walk, perform a gentle yoga sequence, foam rolling, and dynamic stretching. Briefly explain how each activity aids recovery: A light walk promotes blood flow and reduces muscle stiffness, gentle yoga enhances flexibility and relaxation, foam rolling helps release muscle tension, and dynamic stretching improves range of motion and prevents injury.'
+}
+Final HTML being sent to the client: <div class="workout-heading"><strong>Your 7-day Workout Plan for Weight Loss</strong></div><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="padding:8px; border:1px solid #ccc;">Day</th><th style="padding:8px; border:1px solid #ccc;">Plan</th></tr></thead><tbody><tr><td style="padding:8px; border:1px solid #ccc;">Monday</td><td style="padding:8px; border:1px solid #ccc;"><strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.<br><br><strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.<br><br><strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.<br><br><strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.</td></tr><tr><td style="padding:8px; border:1px solid #ccc;">Tuesday</td><td style="padding:8px; border:1px solid #ccc;"><strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.<br><br><strong>Main Circuit (2 circuits):</strong><br><strong>1. Lunges:</strong> Step forward with one leg, lower your body until both knees are at 90-degree angles, then return to standing. Alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>2. Mountain Climbers:</strong> Start in a plank position, drive your knees towards your chest in a running motion. <br><strong>Primary muscles worked:</strong> Core, shoulders, hip flexors.<br><strong>3. Bicycle Crunches:</strong> Lie on your back, bring opposite elbow to knee while extending the other leg. Alternate sides. <br><strong>Primary muscles worked:</strong> Core, obliques.<br><br><strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.<br><br><strong>Cool-Down:</strong><br>Stretch your hip flexors, glutes, obliques, and lower back for 5 minutes to promote flexibility and reduce muscle soreness.</td></tr><tr><td style="padding:8px; border:1px solid #ccc;">Wednesday</td><td style="padding:8px; border:1px solid #ccc;"><strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping rope<br>- 30 seconds of leg kicks<br>- 30 seconds of shoulder circles<br>These exercises increase heart rate, warm up leg muscles, and loosen shoulder joints.<br><br><strong>Main Circuit (2 circuits):</strong><br><strong>1. Burpees:</strong> Start standing, squat down, kick feet back into a plank, do a push-up, jump feet back to hands, and jump up explosively. <br><strong>Primary muscles worked:</strong> Full body.<br><strong>2. Russian Twists:</strong> Sit on the floor, lean back slightly, rotate your torso to touch the floor on each side. <br><strong>Primary muscles worked:</strong> Core, obliques.<br><strong>3. Superman Hold:</strong> Lie on your stomach, lift arms and legs off the ground, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Lower back, glutes, shoulders.<br><br><strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.<br><br><strong>Cool-Down:</strong><br>Stretch your full body, focusing on the lower back, shoulders, and core, for 5 minutes to improve flexibility and reduce muscle tension.</td></tr><tr><td style="padding:8px; border:1px solid #ccc;">Thursday</td><td style="padding:8px; border:1px solid #ccc;"><strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of butt kicks<br>- 30 seconds of arm circles<br>- 30 seconds of torso twists<br>These exercises warm up the legs, shoulders, and core muscles.<br><br><strong>Main Circuit (2 circuits):</strong><br><strong>1. Plank with Shoulder Taps:</strong> Start in a plank position, tap each shoulder with the opposite hand while engaging the core. <br><strong>Primary muscles worked:</strong> Core, shoulders.<br><strong>2. Jump Squats:</strong> Perform a squat, then explode up into a jump, land softly, and repeat. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.<br><strong>3. Side Plank:</strong> Hold a side plank position on each side for 30 seconds. <br><strong>Primary muscles worked:</strong> Obliques, core, shoulders.<br><br><strong>Rest & Cool-Down:</strong><br>Perform each exercise with proper form and focus on engaging the targeted muscles. Take deep breaths and stretch to help your muscles recover and prevent injury.<br><br><strong>Cool-Down:</strong><br>Stretch your core, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.</td></tr><tr><td style="padding:8px; border:1px solid #ccc;">Friday</td><td style="padding:8px; border:1px solid #ccc;"><strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of jumping jacks<br>- 30 seconds of arm circles<br>- 30 seconds of leg swings<br>These exercises activate the cardiovascular system, shoulders, and legs.<br><br><strong>Main Circuit (2 circuits):</strong><br><strong>1. Tricep Dips:</strong> Sit on the edge of a chair, place hands next to hips, lift hips off the chair, bend elbows to lower body, then push back up. <br><strong>Primary muscles worked:</strong> Triceps, shoulders.<br><strong>2. Reverse Lunges:</strong> Step back into a lunge position, return to standing, and alternate legs. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Wall Sit:</strong> Sit against a wall with knees at a 90-degree angle, hold for 30 seconds. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, calves.<br><br><strong>Rest & Cool-Down:</strong><br>Take deep breaths and focus on your breathing to aid in recovery. Relax your muscles to prevent tension.<br><br><strong>Cool-Down:</strong><br>Stretch your triceps, quadriceps, hamstrings, and calves for 5 minutes to promote flexibility and reduce muscle soreness.</td></tr><tr><td style="padding:8px; border:1px solid #ccc;">Saturday</td><td style="padding:8px; border:1px solid #ccc;"><strong>Warm-Up (5 minutes):</strong><br>- 30 seconds of high knees<br>- 30 seconds of arm swings<br>- 30 seconds of hip circles<br>These exercises warm up the lower body, upper body, and core muscles.<br><br><strong>Main Circuit (2 circuits):</strong><br><strong>1. Push-Ups:</strong> Start in a plank position, lower your body until your chest nearly touches the floor, then push back up. <br><strong>Primary muscles worked:</strong> Chest, shoulders, triceps.<br><strong>2. Bodyweight Squats:</strong> Stand with feet hip-width apart, lower into a squat position, then return to standing. <br><strong>Primary muscles worked:</strong> Quadriceps, glutes, hamstrings.<br><strong>3. Plank:</strong> Hold a plank position with a straight back and engaged core. <br><strong>Primary muscles worked:</strong> Core, shoulders, back.<br><br><strong>Rest & Cool-Down:</strong><br>Focus on your breathing and relax your muscles to aid in recovery. Take deep breaths and stretch to help your muscles recover and prevent injury.<br><br><strong>Cool-Down:</strong><br>Stretch your chest, shoulders, quads, hamstrings, and calves for 5 minutes to aid in recovery.</td></tr><tr><td style="padding:8px; border:1px solid #ccc;">Sunday</td><td style="padding:8px; border:1px solid #ccc;"><strong>Rest Day:</strong> Take a 10-15 minute light walk, perform a gentle yoga sequence, foam rolling, and dynamic stretching. Briefly explain how each activity aids recovery: A light walk promotes blood flow and reduces muscle stiffness, gentle yoga enhances flexibility and relaxation, foam rolling helps release muscle tension, and dynamic stretching improves range of motion and prevents injury.</td></tr></tbody></table>
+Received Meal Preferences (meals.js): {
+  dietStyle: 'General',
+  allergies: 'None',
+  lactoseIntolerant: false,
+  additionalComments: '',
+  mealPlanOption: 'new',
+  pantryItems: ''
+}
+Meal Plan Prompt Sent to OpenAI (meals.js): Generate a personalized weekly meal plan based on the following details:
+- Dietary Preferences: General
+- Allergies: None
+- Lactose Intolerant: No
+- Additional Comments: No additional comments provided
+- Meal Plan Option: new
+- Pantry Inventory: none
+
+Based on your fitness goals, your daily target is approximately 2264 calories per day. This includes around 170g protein, 226g carbohydrates, and 75g fat to fuel your workouts and support weight loss. Enjoy balanced meals and nutritious snacks throughout the day.
+
+RETURN ONLY a valid JSON object with no additional text or markdown formatting.
+The JSON object must exactly have the following structure:
+{
+  "mealPlan": {
+      "Monday": {
+          "meals": [
+              { "title": "Breakfast", "recipe": "<Detailed recipe...>" },
+              { "title": "Lunch", "recipe": "<Detailed recipe...>" },
+              { "title": "Dinner", "recipe": "<Detailed recipe...>" },
+              { "title": "Snacks", "recipe": "<Detailed recipe...>" }
+          ],
+          "dailyMacros": "<Summary of total daily macros>"
+      },
+      "Tuesday": { ... },
+      ...,
+      "Saturday": { ... },
+      "Sunday": "Rest Day"
+  },
+  "groceryList": {
+      "Protein Sources": ["<ingredient and amount>", "..."],
+      "Grains & Carbs": ["..."],
+      "Vegetables": ["..."],
+      "Fruits": ["..."],
+      "Healthy Fats & Extras": ["..."],
+      "Seasonings & Pantry Staples": ["..."]
+  }
+}
+Full OpenAI Response (meals.js): {
+  "id": "chatcmpl-BZsdrgGcK4ASamKsbREP1mqP6XtIj",
+  "object": "chat.completion",
+  "created": 1747891223,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"mealPlan\": {\n      \"Monday\": {\n          \"meals\": [\n              { \"title\": \"Breakfast\", \"recipe\": \"Greek yogurt with berries and granola\" },\n              { \"title\": \"Lunch\", \"recipe\": \"Grilled chicken salad with mixed greens, cherry tomatoes, cucumbers, and balsamic vinaigrette\" },\n              { \"title\": \"Dinner\", \"recipe\": \"Baked salmon with quinoa and roasted asparagus\" },\n              { \"title\": \"Snacks\", \"recipe\": \"Almonds and an apple\" }\n          ],\n          \"dailyMacros\": \"Protein: 60g, Carbohydrates: 90g, Fat: 30g\"\n      },\n      \"Tuesday\": {\n          \"meals\": [\n              { \"title\": \"Breakfast\", \"recipe\": \"Oatmeal with sliced banana and almond butter\" },\n              { \"title\": \"Lunch\", \"recipe\": \"Turkey and avocado wrap with whole wheat tortilla\" },\n              { \"title\": \"Dinner\", \"recipe\": \"Stir-fried tofu with vegetables and brown rice\" },\n              { \"title\": \"Snacks\", \"recipe\": \"Greek yogurt with honey and walnuts\" }\n          ],\n          \"dailyMacros\": \"Protein: 55g, Carbohydrates: 80g, Fat: 25g\"\n      },\n      \"Wednesday\": {\n          \"meals\": [\n              { \"title\": \"Breakfast\", \"recipe\": \"Scrambled eggs with spinach and whole grain toast\" },\n              { \"title\": \"Lunch\", \"recipe\": \"Quinoa salad with chickpeas, bell peppers, and feta cheese\" },\n              { \"title\": \"Dinner\", \"recipe\": \"Grilled shrimp skewers with couscous and roasted zucchini\" },\n              { \"title\": \"Snacks\", \"recipe\": \"Carrot sticks with hummus\" }\n          ],\n          \"dailyMacros\": \"Protein: 65g, Carbohydrates: 75g, Fat: 20g\"\n      },\n      \"Thursday\": {\n          \"meals\": [\n              { \"title\": \"Breakfast\", \"recipe\": \"Smoothie with spinach, banana, protein powder, and almond milk\" },\n              { \"title\": \"Lunch\", \"recipe\": \"Caprese salad with mozzarella, tomatoes, basil, and balsamic glaze\" },\n              { \"title\": \"Dinner\", \"recipe\": \"Grilled chicken breast with sweet potato and steamed broccoli\" },\n              { \"title\": \"Snacks\", \"recipe\": \"Cottage cheese with pineapple chunks\" }\n          ],\n          \"dailyMacros\": \"Protein: 70g, Carbohydrates: 85g, Fat: 35g\"\n      },\n      \"Friday\": {\n          \"meals\": [\n              { \"title\": \"Breakfast\", \"recipe\": \"Whole grain pancakes with maple syrup and mixed berries\" },\n              { \"title\": \"Lunch\", \"recipe\": \"Tuna salad sandwich on whole wheat bread\" },\n              { \"title\": \"Dinner\", \"recipe\": \"Beef stir-fry with brown rice and snap peas\" },\n              { \"title\": \"Snacks\", \"recipe\": \"Trail mix with nuts and dried fruit\" }\n          ],\n          \"dailyMacros\": \"Protein: 75g, Carbohydrates: 90g, Fat: 40g\"\n      },\n      \"Saturday\": {\n          \"meals\": [\n              { \"title\": \"Breakfast\", \"recipe\": \"Egg and vegetable scramble with whole grain toast\" },\n              { \"title\": \"Lunch\", \"recipe\": \"Mediterranean quinoa bowl with roasted vegetables and feta cheese\" },\n              { \"title\": \"Dinner\", \"recipe\": \"Grilled steak with sweet potato fries and green beans\" },\n              { \"title\": \"Snacks\", \"recipe\": \"Greek yogurt with granola and mixed berries\" }\n          ],\n          \"dailyMacros\": \"Protein: 80g, Carbohydrates: 95g, Fat: 45g\"\n      },\n      \"Sunday\": \"Rest Day\"\n  },\n  \"groceryList\": {\n      \"Protein Sources\": [\"Chicken breast\", \"Salmon\", \"Tofu\", \"Turkey\", \"Shrimp\", \"Eggs\", \"Tuna\", \"Steak\"],\n      \"Grains & Carbs\": [\"Quinoa\", \"Brown rice\", \"Whole wheat tortilla\", \"Couscous\", \"Sweet potato\", \"Whole grain bread\", \"Whole grain pancakes\"],\n      \"Vegetables\": [\"Mixed greens\", \"Cherry tomatoes\", \"Cucumbers\", \"Asparagus\", \"Spinach\", \"Bell peppers\", \"Zucchini\", \"Broccoli\", \"Snap peas\", \"Green beans\"],\n      \"Fruits\": [\"Berries\", \"Banana\", \"Apple\", \"Pineapple\"],\n      \"Healthy Fats & Extras\": [\"Almonds\", \"Avocado\", \"Almond butter\", \"Walnuts\", \"Hummus\", \"Cottage cheese\", \"Feta cheese\"],\n      \"Seasonings & Pantry Staples\": [\"Balsamic vinaigrette\", \"Olive oil\", \"Honey\", \"Protein powder\", \"Maple syrup\", \"Trail mix\"]\n  }\n}",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 353,
+    "completion_tokens": 1124,
+    "total_tokens": 1477,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+Raw mealPlanResponse: {
+  "mealPlan": {
+      "Monday": {
+          "meals": [
+              { "title": "Breakfast", "recipe": "Greek yogurt with berries and granola" },
+              { "title": "Lunch", "recipe": "Grilled chicken salad with mixed greens, cherry tomatoes, cucumbers, and balsamic vinaigrette" },
+              { "title": "Dinner", "recipe": "Baked salmon with quinoa and roasted asparagus" },
+              { "title": "Snacks", "recipe": "Almonds and an apple" }
+          ],
+          "dailyMacros": "Protein: 60g, Carbohydrates: 90g, Fat: 30g"
+      },
+      "Tuesday": {
+          "meals": [
+              { "title": "Breakfast", "recipe": "Oatmeal with sliced banana and almond butter" },
+              { "title": "Lunch", "recipe": "Turkey and avocado wrap with whole wheat tortilla" },
+              { "title": "Dinner", "recipe": "Stir-fried tofu with vegetables and brown rice" },
+              { "title": "Snacks", "recipe": "Greek yogurt with honey and walnuts" }
+          ],
+          "dailyMacros": "Protein: 55g, Carbohydrates: 80g, Fat: 25g"
+      },
+      "Wednesday": {
+          "meals": [
+              { "title": "Breakfast", "recipe": "Scrambled eggs with spinach and whole grain toast" },
+              { "title": "Lunch", "recipe": "Quinoa salad with chickpeas, bell peppers, and feta cheese" },
+              { "title": "Dinner", "recipe": "Grilled shrimp skewers with couscous and roasted zucchini" },
+              { "title": "Snacks", "recipe": "Carrot sticks with hummus" }
+          ],
+          "dailyMacros": "Protein: 65g, Carbohydrates: 75g, Fat: 20g"
+      },
+      "Thursday": {
+          "meals": [
+              { "title": "Breakfast", "recipe": "Smoothie with spinach, banana, protein powder, and almond milk" },
+              { "title": "Lunch", "recipe": "Caprese salad with mozzarella, tomatoes, basil, and balsamic glaze" },
+              { "title": "Dinner", "recipe": "Grilled chicken breast with sweet potato and steamed broccoli" },
+              { "title": "Snacks", "recipe": "Cottage cheese with pineapple chunks" }
+          ],
+          "dailyMacros": "Protein: 70g, Carbohydrates: 85g, Fat: 35g"
+      },
+      "Friday": {
+          "meals": [
+              { "title": "Breakfast", "recipe": "Whole grain pancakes with maple syrup and mixed berries" },
+              { "title": "Lunch", "recipe": "Tuna salad sandwich on whole wheat bread" },
+              { "title": "Dinner", "recipe": "Beef stir-fry with brown rice and snap peas" },
+              { "title": "Snacks", "recipe": "Trail mix with nuts and dried fruit" }
+          ],
+          "dailyMacros": "Protein: 75g, Carbohydrates: 90g, Fat: 40g"
+      },
+      "Saturday": {
+          "meals": [
+              { "title": "Breakfast", "recipe": "Egg and vegetable scramble with whole grain toast" },
+              { "title": "Lunch", "recipe": "Mediterranean quinoa bowl with roasted vegetables and feta cheese" },
+              { "title": "Dinner", "recipe": "Grilled steak with sweet potato fries and green beans" },
+              { "title": "Snacks", "recipe": "Greek yogurt with granola and mixed berries" }
+          ],
+          "dailyMacros": "Protein: 80g, Carbohydrates: 95g, Fat: 45g"
+      },
+      "Sunday": "Rest Day"
+  },
+  "groceryList": {
+      "Protein Sources": ["Chicken breast", "Salmon", "Tofu", "Turkey", "Shrimp", "Eggs", "Tuna", "Steak"],
+      "Grains & Carbs": ["Quinoa", "Brown rice", "Whole wheat tortilla", "Couscous", "Sweet potato", "Whole grain bread", "Whole grain pancakes"],
+      "Vegetables": ["Mixed greens", "Cherry tomatoes", "Cucumbers", "Asparagus", "Spinach", "Bell peppers", "Zucchini", "Broccoli", "Snap peas", "Green beans"],
+      "Fruits": ["Berries", "Banana", "Apple", "Pineapple"],
+      "Healthy Fats & Extras": ["Almonds", "Avocado", "Almond butter", "Walnuts", "Hummus", "Cottage cheese", "Feta cheese"],
+      "Seasonings & Pantry Staples": ["Balsamic vinaigrette", "Olive oil", "Honey", "Protein powder", "Maple syrup", "Trail mix"]
+  }
+}

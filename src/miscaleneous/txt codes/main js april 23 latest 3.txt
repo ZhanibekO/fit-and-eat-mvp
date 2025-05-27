@@ -1,0 +1,559 @@
+/*******************************
+ * MAIN.JS - Client-Side Logic *
+ *******************************/
+
+/* ===================== */
+/* UTILITY FUNCTIONS     */
+/* ===================== */
+function setLoadingMessage(message) {
+  const workoutResult = document.getElementById("workoutResult");
+  if (!workoutResult) {
+    console.error("#workoutResult element not found in the DOM.");
+    return;
+  }
+  workoutResult.innerHTML = `<p style="text-align:center; font-size:1.5rem; color:#34495e;">${message}</p>`;
+}
+
+function setErrorMessage(error, section = "workoutResult") {
+  const sectionEl = document.getElementById(section);
+  if (!sectionEl) {
+    console.error(`#${section} element not found in the DOM.`);
+    return;
+  }
+  sectionEl.innerHTML = `<p class="error-message">${error}</p>`;
+  console.error("Error Message Displayed:", error);
+}
+
+/* ===================== */
+/* CALORIE & MACRONUTRIENT CALCULATIONS */
+/* ===================== */
+function calculateCalorieTarget(profile) {
+  let weight = parseFloat(profile.weight);
+  let height = parseFloat(profile.height);
+  let age = parseInt(profile.age);
+  if (isNaN(weight) || isNaN(height) || isNaN(age)) {
+    return 1650; // fallback default
+  }
+  let bmr = profile.gender && profile.gender.toLowerCase() === "male"
+    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  let activityFactor = 1.2;
+  if (profile.activityLevel) {
+    let level = profile.activityLevel.toLowerCase();
+    if (level.includes("moderately")) {
+      activityFactor = 1.55;
+    } else if (level.includes("very")) {
+      activityFactor = 1.725;
+    }
+  }
+  let tdee = bmr * activityFactor;
+  if (profile.fitnessGoal) {
+    let goal = profile.fitnessGoal.toLowerCase();
+    if (goal === "loseweight") {
+      tdee *= 0.85;
+    } else if (goal === "gainmuscle") {
+      tdee *= 1.10;
+    }
+  }
+  return Math.round(tdee);
+}
+
+function calculateMacros(calories) {
+  const protein = Math.round((calories * 0.30) / 4);
+  const carbs = Math.round((calories * 0.40) / 4);
+  const fat = Math.round((calories * 0.30) / 9);
+  return { protein, carbs, fat };
+}
+
+/* ===================== */
+/* WORKOUT FORMATTING    */
+/* ===================== */
+function getExerciseDuration(exerciseLine) {
+  const timeMatch = exerciseLine.match(/(\d+\s*(minutes|minute|seconds|second))/i);
+  return timeMatch ? timeMatch[0] : null;
+}
+
+function reformatCircuitWorkout(rawText) {
+  rawText = rawText.replace(/Here is your personalized 7[-\s]?day workout plan for weight loss[:\s]*/gi, "")
+                   .replace(/\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday):/gi, "")
+                   .trim();
+  
+  let segments = rawText.split(/<br>|[\r\n]+/).map(s => s.trim()).filter(s => s.length > 0);
+  segments = segments.filter(seg => {
+    if (seg.length < 20 && /^\d+\s*minute/i.test(seg)) return false;
+    if (/between exercises/i.test(seg) || /after completing/i.test(seg)) return false;
+    return true;
+  });
+  
+  if (segments.length === 0) return rawText;
+  
+  let items = [];
+  let warmUp = segments[0];
+  if (!/^warm[-\s]?up:/i.test(warmUp)) {
+    warmUp = "Warm-Up: " + warmUp;
+  }
+  items.push(warmUp);
+  
+  for (let i = 1; i < segments.length; i++) {
+    let step = segments[i].replace(/^[\-\*\d\.\s]+/, "")
+                            .replace(/^(Main Circuit:|Rest:|Cool[-\s]?Down:)/i, "")
+                            .trim();
+    if (!/[a-zA-Z]/.test(step)) continue;
+    if (!/rest\s*-?\s*1 minute/i.test(step)) {
+      step += " , rest - 1 minute";
+    }
+    items.push(step);
+  }
+  
+  let formatted = "<ol>";
+  items.forEach(item => {
+    formatted += `<li>${item}</li>`;
+  });
+  formatted += "</ol>";
+  return formatted;
+}
+
+/* ===================== */
+/* COMPRESS HTML STRING  */
+/* ===================== */
+function compressHTML(html) {
+  return html.replace(/\n/g, "").replace(/>\s+</g, "><").trim();
+}
+
+/* ===================== */
+/* WORKOUT & MEAL PLAN GENERATION */
+/* ===================== */
+let userProfileData = null;
+
+document.addEventListener("DOMContentLoaded", function () {
+  const continueButton = document.getElementById("continueDetails");
+  if (!continueButton) {
+    console.error("Button with ID 'continueDetails' not found.");
+    return;
+  }
+  continueButton.addEventListener("click", async function () {
+    console.log("Continue button clicked.");
+    const userGoals = document.getElementById("userGoals")?.value.trim();
+    const warningEl = document.getElementById("goalsWarning");
+    if (!userGoals) {
+      if (warningEl) warningEl.style.display = "block";
+      console.warn("User goals input is empty.");
+      return;
+    }
+    if (warningEl) warningEl.style.display = "none";
+    const detailsSection = document.getElementById("detailsSection");
+    if (!detailsSection) {
+      console.error("#detailsSection not found.");
+      return;
+    }
+    detailsSection.style.display = "block";
+    detailsSection.classList.add("visible");
+    console.log("Details section displayed successfully.");
+    try {
+      const res = await fetch("/submit-goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userGoals })
+      });
+      const data = await res.json();
+      console.log("Server Response:", data);
+      if (!data.success) {
+        console.warn("Failed to submit user goals:", data.message);
+        setErrorMessage("Failed to submit goals. Try again.");
+      } else {
+        const successMessage = document.getElementById("successMessage");
+        if (successMessage) {
+          successMessage.textContent = "Your goals were successfully submitted!";
+          successMessage.style.display = "block";
+          console.log("Goals submitted successfully.");
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting user goals to the server:", error);
+    }
+  });
+
+  document.getElementById("fitnessGoal").addEventListener("change", function () {
+    const goalInput = document.getElementById("goalWeightInput");
+    const selectedGoal = this.value;
+    if (selectedGoal === "gainWeight" || selectedGoal === "loseWeight") {
+      goalInput.style.display = "block";
+      console.log("Weight goal input is now visible.");
+    } else {
+      goalInput.style.display = "none";
+      console.log("Weight goal input is now hidden.");
+    }
+  });
+
+  document.getElementById("generateWorkout").classList.add("meal-plan-btn");
+});
+
+/* ===================== */
+/* WORKOUT PLAN GENERATION */
+/* ===================== */
+document.getElementById("generateWorkout").addEventListener("click", async function () {
+  const workoutResult = document.getElementById("workoutResult");
+  setLoadingMessage("Please wait while we generate your custom workout plan...");
+  workoutResult.style.display = "block";
+
+  const age = document.getElementById("age")?.value.trim();
+  const currentWeight = document.getElementById("weight")?.value.trim();
+  const fitnessGoal = document.getElementById("fitnessGoal")?.value.trim();
+
+  if (!age || age <= 0) {
+    workoutResult.innerHTML = `<p style="text-align:center; color:red;">Age must be a positive number.</p>`;
+    return;
+  }
+  if (!currentWeight || currentWeight <= 0) {
+    workoutResult.innerHTML = `<p style="text-align:center; color:red;">Current weight must be a positive number.</p>`;
+    return;
+  }
+  if (!fitnessGoal) {
+    workoutResult.innerHTML = `<p style="text-align:center; color:red;">Please select a fitness goal.</p>`;
+    return;
+  }
+
+  const userInput = {
+    gender: document.getElementById("gender")?.value,
+    age,
+    weight: currentWeight,
+    weightUnit: document.getElementById("weightUnit")?.value,
+    height: document.getElementById("height")?.value,
+    heightUnit: document.getElementById("heightUnit")?.value,
+    fitnessGoal,
+    goalWeight: document.getElementById("goalWeight")?.value,
+    workoutType: document.getElementById("workoutType")?.value,
+    lifestyle: document.getElementById("userGoals")?.value.trim(),
+    fitnessLevel: document.getElementById("fitnessLevel")?.value,
+    timeCommitment: document.getElementById("timeCommitment")?.value,
+    activityLevel: document.getElementById("activityLevel")?.value,
+    equipment: (() => {
+      const elems = document.querySelectorAll("input[name='equipment']:checked");
+      return Array.from(elems).map(el => el.value);
+    })()
+  };
+  console.log("User Input Sent to Server:", userInput);
+
+  try {
+    const res = await fetch("/api/workouts/generate-workout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userInput)
+    });
+    const data = await res.json();
+    console.log("Server Response:", data);
+    if (!res.ok || (data.error && data.error !== null)) {
+      setErrorMessage("Error generating workout plan. Please try again.");
+      console.error("Server Error:", data.error);
+      return;
+    }
+    
+    let workoutText = data.workout.replace(/Here is a personalized bodyweight workout plan for you to help achieve your loseWeight goal:\s*/i, "Here is your personalized 7 day workout plan for weight loss.").trim();
+    if (!workoutText) {
+      console.error("No workout text was returned.");
+      setErrorMessage("Workout plan is empty. Please try again.");
+      return;
+    }
+    
+    let workoutPlan;
+    try {
+      workoutPlan = JSON.parse(workoutText);
+    } catch (e) {
+      console.error("Error parsing workout JSON:", e);
+      setErrorMessage("Invalid workout format received from server.");
+      return;
+    }
+    
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    let tableRows = "";
+    dayNames.forEach((day, idx) => {
+      let dayContent = "";
+      if (typeof workoutPlan[day] === "object") {
+        dayContent += `<strong>Warm-Up:</strong> ${workoutPlan[day].warmUp}<br>`;
+        dayContent += `<strong>Main Circuit:</strong><br><ol>`;
+        workoutPlan[day].mainCircuit.forEach((exercise) => {
+          dayContent += `<li>${exercise}</li>`;
+        });
+        dayContent += `</ol>`;
+        dayContent += `<strong>Rest:</strong> ${workoutPlan[day].rest}<br>`;
+        dayContent += `<strong>Cool-Down:</strong> ${workoutPlan[day].coolDown}`;
+      } else {
+        dayContent = workoutPlan[day];
+      }
+      tableRows += `<tr>
+        <td style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#333; font-weight:bold;">Day ${idx + 1}: ${day}</td>
+        <td style="padding:8px; border:1px solid #ccc; color:#333;">${dayContent}</td>
+      </tr>`;
+    });
+    
+    const workoutInstructions = `<div style="text-align:center; font-size:1rem; color:#34495e; margin:10px 0;">
+<strong>Workout Instructions:</strong><br>
+1. This is a circuit-style bodyweight workout that consists of 3 rounds.<br>
+2. Rest 1 minute between exercises and 2 minutes after completing one round.<br>
+3. Cool down and stretch for 5 minutes after completing all three rounds.
+</div>`;
+    
+    const headerText = `<p style="text-align:center; color:#34495e; font-size:1.2rem;">
+Here is your personalized 7 day workout plan for weight loss.
+</p>`;
+    const finalMessage = `<p style="text-align:center; color:#34495e; font-size:1rem;">
+This workout is not a race—go at a pace that suits your fitness level.
+Remember to warm up before each workout and cool down afterwards.
+Stay hydrated and listen to your body. As you progress, increase time or difficulty gradually.
+Good luck on your weight loss journey!
+</p>`;
+    
+    let tableHTML = `
+      ${workoutInstructions}
+      ${headerText}
+      <table class="workout-table" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#333;">Day</th>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#333;">Exercise Routine</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+      ${finalMessage}
+      <div style="text-align:center; margin-top:20px;">
+        <button id="generateMealPlan" class="meal-plan-btn">Generate Custom Meal Plan</button>
+      </div>
+    `;
+    tableHTML = compressHTML(tableHTML);
+    console.log("Final Workout Table HTML:", tableHTML);
+    workoutResult.innerHTML = tableHTML;
+    
+    // Reattach the event listener for the "Generate Custom Meal Plan" button.
+    const mealPlanBtn = document.getElementById("generateMealPlan");
+    if (mealPlanBtn) {
+      mealPlanBtn.addEventListener("click", showMealPlanQuestions);
+      console.log("Meal plan button event listener attached.");
+    }
+    console.log("Workout plan displayed successfully.");
+  } catch (error) {
+    console.error("Error Fetching Workout Plan:", error);
+    setErrorMessage("Error generating workout plan. Please try again.");
+  }
+});
+
+/* ===================== */
+/* MEAL PLAN SECTION */
+/* ===================== */
+const DEFAULT_MACROS = "Breakfast: 300 kcal, 15g protein, 10g fat, 45g carbs; Lunch: 500 kcal, 30g protein, 15g fat, 60kcal carbs; Dinner: 600 kcal, 35g protein, 20g fat, 70kcal carbs; Total: 1400 kcal, 80g protein, 45g fat, 175kcal carbs;";
+
+function showMealPlanQuestions() {
+  console.log("showMealPlanQuestions() called");
+  const workoutResult = document.getElementById("workoutResult");
+  // If the meal plan form is already present, do nothing.
+  if (document.getElementById("mealPlanForm")) {
+    console.log("Meal plan form already in DOM, returning.");
+    return;
+  }
+
+  // Insert a loading message immediately after clicking the button.
+  const loadingHTML = `<p id="mealPlanLoading" style="text-align:center; font-size:1.2rem; color:#34495e;">Please wait while we generate your custom meal plan...</p>`;
+  workoutResult.insertAdjacentHTML("beforeend", loadingHTML);
+
+  // Simulate a short delay (500 ms) then remove the loading message and insert the meal plan form.
+  setTimeout(() => {
+    // Remove the loading message.
+    const loadingEl = document.getElementById("mealPlanLoading");
+    if (loadingEl) {
+      loadingEl.remove();
+    }
+    
+    // Insert the meal plan questions form along with a results container.
+    const html = `
+      <div id="mealPlanSection">
+        <div id="mealPlanFormContainer">
+          <h2 style="text-align:left; color:#34495e;">Meal Plan Questions:</h2>
+          <div style="background-color:#f9f9f9; padding:20px; border-radius:8px;">
+            <form id="mealPlanForm">
+              <div class="form-group">
+                <label for="dietStyle" style="color:#34495e;">Diet Style:</label>
+                <select id="dietStyle" name="dietStyle" aria-required="true">
+                  <option value="" disabled selected>Select Diet Style</option>
+                  <option value="keto">Keto</option>
+                  <option value="mediterranean">Mediterranean</option>
+                  <option value="vegan">Vegan</option>
+                  <option value="vegetarian">Vegetarian</option>
+                  <option value="general">General</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="allergies" style="color:#34495e;">Allergies or Dietary Restrictions:</label>
+                <select id="allergies" name="allergies" aria-required="true">
+                  <option value="" disabled selected>Select Allergies</option>
+                  <option value="none">None</option>
+                  <option value="gluten">Gluten</option>
+                  <option value="nuts">Nuts</option>
+                  <option value="dairy">Dairy</option>
+                  <option value="shellfish">Shellfish</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="lactoseIntolerant" style="color:#34495e;">Are You Lactose Intolerant?</label>
+                <select id="lactoseIntolerant" name="lactoseIntolerant" aria-required="true">
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="additionalComments" style="color:#34495e;">Additional Comments:</label>
+                <textarea id="additionalComments" name="additionalComments" rows="4" placeholder="Add any additional comments..." aria-required="false"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Meal Plan Option:</label>
+                <div>
+                  <label><input type="radio" name="mealPlanOption" value="new" checked> Create a brand new meal plan</label>
+                  <label><input type="radio" name="mealPlanOption" value="pantry"> Use my pantry inventory</label>
+                </div>
+              </div>
+              <div class="form-group" id="pantryField" style="display:none;">
+                <label for="pantryItems" style="color:#34495e;">Your Pantry Inventory (comma‑separated):</label>
+                <input type="text" id="pantryItems" name="pantryItems" placeholder="e.g., Rice, Beans, Olive Oil">
+              </div>
+              <!-- Keep the submit button inside the form -->
+              <button id="submitMealPlan" type="button" class="meal-plan-btn">Generate Meal Plan</button>
+            </form>
+          </div>
+        </div>
+        <!-- Results container, which will appear BELOW the form -->
+        <div id="mealPlanResults"></div>
+      </div>
+    `;
+    const htmlCompressed = compressHTML(html);
+    // Insert this HTML at the top of the workoutResult so that the form appears above any previously generated content.
+    workoutResult.insertAdjacentHTML("afterbegin", htmlCompressed);
+    
+    // Attach listener to the radio buttons to toggle the pantry inventory field.
+    const mealPlanOptions = document.getElementsByName("mealPlanOption");
+    mealPlanOptions.forEach(option => {
+      option.addEventListener("change", function () {
+        const pantryField = document.getElementById("pantryField");
+        pantryField.style.display = (this.value === "pantry") ? "block" : "none";
+      });
+    });
+    
+    // Attach an event listener for the submit button within the meal plan form.
+    const submitMealPlanBtn = document.getElementById("submitMealPlan");
+    if (submitMealPlanBtn) {
+      submitMealPlanBtn.addEventListener("click", async () => {
+        console.log("Submit Meal Plan button clicked");
+        // Update only the results container with a loading message.
+        const resultsContainer = document.getElementById("mealPlanResults");
+        resultsContainer.innerHTML = `<p style="text-align:center; font-size:1.2rem; color:#34495e;">Generating your meal plan... please wait.</p>`;
+        
+        // Collect form data.
+        const dietStyle = document.getElementById("dietStyle").value;
+        const allergies = document.getElementById("allergies").value;
+        const lactoseIntolerant = document.getElementById("lactoseIntolerant").value;
+        const additionalComments = document.getElementById("additionalComments").value;
+        const mealPlanOption = document.querySelector("input[name='mealPlanOption']:checked").value;
+        const pantryItems = document.getElementById("pantryItems") ? document.getElementById("pantryItems").value : "";
+  
+        // Collect user profile data.
+        const gender = document.getElementById("gender") ? document.getElementById("gender").value : "";
+        const weight = document.getElementById("weight") ? document.getElementById("weight").value : "";
+        const height = document.getElementById("height") ? document.getElementById("height").value : "";
+        const age = document.getElementById("age") ? document.getElementById("age").value : "";
+        const activityLevel = document.getElementById("activityLevel") ? document.getElementById("activityLevel").value : "";
+        const fitnessGoal = document.getElementById("fitnessGoal") ? document.getElementById("fitnessGoal").value : "";
+  
+        const mealPlanInput = {
+          dietStyle,
+          allergies,
+          lactoseIntolerant,
+          additionalComments,
+          mealPlanOption,
+          pantryItems,
+          profile: { gender, weight, height, age, activityLevel, fitnessGoal }
+        };
+        console.log("Meal Plan Input:", mealPlanInput);
+        
+        try {
+          const response = await fetch("/api/meals/generate-meal-plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(mealPlanInput)
+          });
+          const result = await response.json();
+          console.log("Meal Plan API Response:", result);
+          if (!response.ok || result.error) {
+            resultsContainer.innerHTML = `<p style="text-align:center; color:red;">Error generating meal plan. Please try again.</p>`;
+          } else {
+            resultsContainer.innerHTML = renderMealPlan(result.mealPlan, result.groceryList);
+          }
+        } catch (error) {
+          console.error("Error calling meal plan API:", error);
+          resultsContainer.innerHTML = `<p style="text-align:center; color:red;">Error generating meal plan. Please try again.</p>`;
+        }
+      });
+      console.log("Submit Meal Plan button event listener attached.");
+    } else {
+      console.error("Submit Meal Plan button not found in the DOM");
+    }
+    
+  }, 500);
+}
+
+function renderMealPlan(mealPlan, groceryList) {
+  let mealPlanTable = `<table class="mealplan-table" style="width:100%; border-collapse:collapse;">` +
+    `<thead><tr>` +
+    `<th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0;">Day</th>` +
+    `<th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0;">Meals</th>` +
+    `<th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0;">Daily Macros</th>` +
+    `</tr></thead><tbody>`;
+  
+  const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  dayNames.forEach(day => {
+    const dayData = mealPlan[day];
+    if (typeof dayData === "object") {
+      let mealsHTML = "<ol style='margin:0; padding-left:20px;'>";
+      dayData.meals.forEach(meal => {
+        mealsHTML += `<li><strong>${meal.title}:</strong> ${meal.recipe}</li>`;
+      });
+      mealsHTML += "</ol>";
+      mealPlanTable += `<tr>
+          <td style="padding:8px; border:1px solid #ccc;">${day}</td>
+          <td style="padding:8px; border:1px solid #ccc;">${mealsHTML}</td>
+          <td style="padding:8px; border:1px solid #ccc;">${dayData.dailyMacros}</td>
+      </tr>`;
+    } else {
+      mealPlanTable += `<tr>
+          <td style="padding:8px; border:1px solid #ccc;">${day}</td>
+          <td colspan="2" style="padding:8px; border:1px solid #ccc; text-align:center;">${dayData}</td>
+      </tr>`;
+    }
+  });
+  mealPlanTable += `</tbody></table>`;
+  
+  let groceryHTML = `<table class="grocery-table" style="width:100%; border-collapse:collapse; margin-top:20px;">` +
+    `<thead><tr>` +
+    `<th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0;">Category</th>` +
+    `<th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0;">Ingredients</th>` +
+    `</tr></thead><tbody>`;
+  
+  for (let category in groceryList) {
+    const ingredients = groceryList[category];
+    const ingredientsHTML = ingredients.join(", ");
+    groceryHTML += `<tr>
+        <td style="padding:8px; border:1px solid #ccc;">${category}</td>
+        <td style="padding:8px; border:1px solid #ccc;">${ingredientsHTML}</td>
+    </tr>`;
+  }
+  groceryHTML += `</tbody></table>`;
+  
+  return `<div id="mealPlanResult">
+    <h2 style="text-align:center; color:#34495e;">Your Customized Meal Plan</h2>
+    ${mealPlanTable}
+    <h3 style="text-align:center; color:#34495e; margin-top:20px;">Grocery List</h3>
+    ${groceryHTML}
+  </div>`;
+}
+
+console.log("JavaScript file loaded successfully.");
+console.log("Event listeners initialized.");

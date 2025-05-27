@@ -1,0 +1,52 @@
+// src/App.js
+
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Import shared layout components
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+
+// Import page components
+import Workouts from "./pages/Workouts";
+import Exercises from "./pages/Exercises";
+import MealPlans from "./pages/MealPlans";
+import Profile from "./pages/Profile";
+
+// Import global styles (if applicable)
+import "./style.css";
+
+function App() {
+  return (
+    <Router>
+      <div className="app-wrapper">
+        {/* Always visible header */}
+        <Header />
+
+        {/* Main content area managed by client-side routing */}
+        <main className="app-content">
+          <Routes>
+            <Route path="/" element={<Workouts />} />
+            <Route path="/exercises" element={<Exercises />} />
+            <Route path="/meal-plans" element={<MealPlans />} />
+            <Route path="/profile" element={<Profile />} />
+            {/* Catch-all for undefined routes */}
+            <Route
+              path="*"
+              element={
+                <div style={{ padding: "2rem", textAlign: "center" }}>
+                  Page Not Found
+                </div>
+              }
+            />
+          </Routes>
+        </main>
+
+        {/* Always visible footer */}
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+
+export default App;

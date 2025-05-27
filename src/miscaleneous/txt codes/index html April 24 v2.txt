@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Personalized fitness and nutrition plans tailored to your goals and lifestyle." />
+  <title>Fitness & Nutrition Personalized for You</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-container">
+      <a href="#hero" class="logo">FitJourney</a>
+      <ul class="navbar-menu">
+        <li><a href="#workouts">Workouts</a></li>
+        <li><a href="#exercises">Exercises</a></li>
+        <li><a href="#meal-plans">Meal Plans</a></li>
+        <li><a href="#progress">Progress</a></li>
+        <li><a href="#profile">Profile</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero" aria-labelledby="hero-heading">
+    <div class="container hero-container">
+      <h1 id="hero-heading">Your Personalized Fitness & Nutrition Journey</h1>
+      <p>
+        Describe your lifestyle and goals – like 
+        <em>"I’m a busy mom with two toddlers"</em>, 
+        <em>"I have a busy office job and I need to fit workouts to my schedule"</em>, 
+        or 
+        <em>"I am a teenager struggling to build muscles"</em> – and let us design the perfect plan tailored just for you.
+      </p>
+      <div class="input-group">
+        <label for="userGoals" class="sr-only">Enter your fitness goals or lifestyle</label>
+        <input type="text" id="userGoals" placeholder="Share your fitness goals or lifestyle (e.g., 'I have a busy office job')" aria-describedby="goalsWarning" aria-required="true" />
+        <button id="continueDetails" aria-label="Submit your fitness goals">Continue</button>
+        <div id="goalsWarning" class="warning" style="display: none;" aria-live="polite">
+          Please tell us about your goals or lifestyle to continue.
+        </div>
+      </div>
+      
+      <!-- Details Section -->
+      <div id="detailsSection" style="display: none;">
+        <h2>Provide More Details to Personalize Your Plan</h2>
+        <form id="fitnessDetailsForm">
+          <div class="form-group">
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender">
+              <option value="" disabled selected>Select your gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" placeholder="Enter your age" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="weight">Current Weight:</label>
+            <input type="number" id="weight" name="weight" placeholder="Enter your current weight" min="0" />
+            <select id="weightUnit" name="weightUnit">
+              <option value="kg">kg</option>
+              <option value="lbs">lbs</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="height">Height:</label>
+            <input type="number" id="height" name="height" placeholder="Enter your height" min="0" />
+            <select id="heightUnit" name="heightUnit">
+              <option value="cm">cm</option>
+              <option value="ft">ft</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fitnessGoal">Fitness Goal:</label>
+            <select id="fitnessGoal" name="fitnessGoal">
+              <option value="" disabled selected>Select your fitness goal</option>
+              <option value="loseWeight">Lose Weight</option>
+              <option value="gainWeight">Gain Weight</option>
+              <option value="gainMuscle">Gain Muscle</option>
+              <option value="maintainWeight">Maintain Weight</option>
+            </select>
+          </div>
+          <div id="goalWeightInput" style="display: none;" class="form-group">
+            <label for="goalWeight">Target Weight:</label>
+            <input type="number" id="goalWeight" name="goalWeight" placeholder="Enter your target weight" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="workoutType">Workout Type:</label>
+            <select id="workoutType" name="workoutType">
+              <option value="" disabled selected>Select workout type</option>
+              <option value="bodyweight">Bodyweight</option>
+              <option value="home">Home</option>
+              <option value="gym">Gym</option>
+            </select>
+          </div>
+          <!-- New additional fields for workout personalization -->
+          <div class="form-group">
+            <label for="fitnessLevel">Fitness Level:</label>
+            <select id="fitnessLevel" name="fitnessLevel">
+              <option value="" disabled selected>Select Fitness Level</option>
+              <option value="Beginner">Beginner (just starting out)</option>
+              <option value="Intermediate">Intermediate (regularly active)</option>
+              <option value="Advanced">Advanced (highly experienced)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="timeCommitment">Time Commitment per Session:</label>
+            <select id="timeCommitment" name="timeCommitment">
+              <option value="" disabled selected>Select Time Commitment</option>
+              <option value="10-20 minutes">10–20 minutes</option>
+              <option value="20-30 minutes">20–30 minutes</option>
+              <option value="30-45 minutes">30–45 minutes</option>
+              <option value="45-60 minutes">45–60 minutes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="activityLevel">Activity Level:</label>
+            <select id="activityLevel" name="activityLevel">
+              <option value="" disabled selected>Select Activity Level</option>
+              <option value="Sedentary">Sedentary</option>
+              <option value="Moderately Active">Moderately Active</option>
+              <option value="Very Active">Very Active</option>
+            </select>
+          </div>
+          <!-- Equipment container -->
+          <div class="form-group" id="equipmentContainer" style="display: none;">
+            <label>Equipment Available:</label>
+            <div id="equipmentOptions">
+              <!-- Equipment checkboxes will be inserted here dynamically -->
+            </div>
+          </div>
+          <!-- New Specific Goals Field -->
+          <div class="form-group">
+            <label for="specificGoals" style="color:#34495e;">Specific Fitness Goals:</label>
+            <input type="text" id="specificGoals" name="specificGoals" placeholder="E.g., abs, toned legs, muscular arms">
+          </div>
+          <button id="generateWorkout" type="button">Generate Workout</button>
+        </form>
+        <div id="workoutResult" style="display: none;"></div>
+      </div>
+      
+      <!-- New Meal Plan Container -->
+      <div id="mealPlanContainer" style="display: none;"></div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2>Why Choose FitJourney?</h2>
+      <div class="features-grid">
+        <div class="card">
+          <img src="https://via.placeholder.com/300x200?text=Workouts" alt="Workouts" />
+          <h3>Custom Workouts</h3>
+          <p>Personalized workout plans tailored to your fitness level and goals.</p>
+        </div>
+        <div class="card">
+          <img src="https://via.placeholder.com/300x200?text=Meal+Plans" alt="Meal Plans" />
+          <h3>Healthy Meal Plans</h3>
+          <p>Weekly meal plans designed around your dietary needs.</p>
+        </div>
+        <div class="card">
+          <img src="https://via.placeholder.com/300x200?text=Progress" alt="Tracking Progress" />
+          <h3>Track Your Progress</h3>
+          <p>Monitor your progress and celebrate milestones with ease.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action Section -->
+  <section class="cta" id="cta">
+    <div class="container cta-container">
+      <h2>Take Control of Your Health Today</h2>
+      <p>Join thousands already transforming their lives through personalized fitness and nutrition.</p>
+      <button id="startNow">Start Now</button>
+    </div>
+  </section>
+
+  <!-- Link to JavaScript -->
+  <script src="main.js"></script>
+  
+  <!-- Dynamic Equipment Options Script -->
+  <script>
+    const equipmentOptions = {
+      bodyweight: `
+        <label><input type="checkbox" name="equipment" value="Pull-up Bar" /> Pull-up Bar</label>
+        <label><input type="checkbox" name="equipment" value="Chair/Bench" /> Chair/Bench</label>
+        <label><input type="checkbox" name="equipment" value="Gymnastic Rings" /> Gymnastic Rings</label>
+        <label><input type="checkbox" name="equipment" value="Dip Station" /> Dip Station</label>
+        <label><input type="checkbox" name="equipment" value="Parallettes" /> Parallettes</label>
+      `,
+      home: `
+        <label><input type="checkbox" name="equipment" value="Resistance Bands" /> Resistance Bands</label>
+        <label><input type="checkbox" name="equipment" value="Adjustable Dumbbells" /> Adjustable Dumbbells</label>
+        <label><input type="checkbox" name="equipment" value="Yoga Mat" /> Yoga Mat</label>
+        <label><input type="checkbox" name="equipment" value="Bodyweight Only" checked disabled /> No Additional Equipment</label>
+      `,
+      gym: `
+        <label><input type="checkbox" name="equipment" value="Dumbbells" /> Dumbbells</label>
+        <label><input type="checkbox" name="equipment" value="Barbells" /> Barbells</label>
+        <label><input type="checkbox" name="equipment" value="Cable Machines" /> Cable Machines</label>
+        <label><input type="checkbox" name="equipment" value="Weight Machines" /> Weight Machines</label>
+      `
+    };
+    
+    document.getElementById("workoutType").addEventListener("change", function () {
+      const equipmentContainer = document.getElementById("equipmentContainer");
+      const selectedType = this.value;
+      if (equipmentOptions[selectedType]) {
+        document.getElementById("equipmentOptions").innerHTML = equipmentOptions[selectedType];
+        equipmentContainer.style.display = "block";
+      } else {
+        equipmentContainer.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>

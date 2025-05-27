@@ -1,0 +1,60 @@
+ai-fitness-app/
+├── workout.js         // Existing backend endpoint for workout generation
+├── meals.js           // Existing backend endpoint for meal plan generation
+├── wearable.js        // New backend endpoint/module for wearable/smart scale integration
+├── server.js          // Express server configuration (serves API endpoints and static build)
+├── node_modules/      
+├── public/
+│   └── index.html     // The static shell that contains <div id="root"></div>
+├── src/               
+│   ├── components/    
+│   │   ├── Header.js             // Common header/navigation for the SPA
+│   │   ├── SearchBar.js          // A search bar component for filtering pages
+│   │   ├── FiltersSidebar.js     // Left-hand menu for filtering and account editing options
+│   │   └── ProgressDashboard.js  // A component that displays user progress (charts, stats)
+│   ├── pages/                   
+│   │   ├── Workouts.js           // Page displaying dynamically generated workouts
+│   │   ├── Exercises.js          // Page listing exercises with instructions, videos, etc.
+│   │   └── Profile.js            // Profile page combining the progress dashboard and user settings (upload images, edit email, password, etc.)
+│   ├── App.js                    // Main application file to set up routes and overall layout
+│   └── index.js                  // Entry point of the SPA (formerly main.js)
+└── style.css           // Global CSS styles (you can also import this into src/index.js)
+
+Explanation
+Backend Files (at the Root):
+
+workout.js & meals.js: Continue handling API calls for dynamic workout and meal plan generation.
+
+wearable.js: A new module that could provide endpoints to connect with wearables or receive data from smart scales. This might include functions for syncing weight data, step counts, heart rate, etc.
+
+server.js: Remains responsible for serving your API endpoints as well as the compiled front‑end. Update its static assets path to point to your build output.
+
+Static Files (public):
+
+index.html: Stays as the minimalist static HTML file that provides an element (like <div id="root"></div>) where your SPA is mounted.
+
+Dynamic Files (src):
+
+components/:
+
+UI Components:
+
+Header.js: Navigation header that might include links to Home, Workouts, Exercises, Profile, etc.
+
+SearchBar.js & FiltersSidebar.js: Reusable components for filtering content on your pages.
+
+ProgressDashboard.js: Specifically designed to show key metrics, charts, or progress photos—this component will be part of the Profile page’s top area.
+
+pages/:
+
+Workouts.js & Exercises.js: Display content related to workouts and exercise databases respectively.
+
+Profile.js: This page could initially load showing the progress dashboard (your personal fitness metrics), and on the left side include a menu for editing account details (like email, password, and profile picture), plus quick links to view current workout challenges, meal plans, or even additional features like device integrations.
+
+App.js: Sets up client‑side routing and combines the header (and other global components) with your various pages.
+
+index.js: Acts as the entry point that mounts your App component into your public/index.html’s designated “root” div.
+
+Global Styling (style.css):
+
+Can either remain at the root (and linked in index.html) or be imported into your src/index.js, ensuring styles apply throughout your app.

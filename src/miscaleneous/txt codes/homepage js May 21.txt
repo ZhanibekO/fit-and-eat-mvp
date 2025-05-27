@@ -1,0 +1,610 @@
+// src/pages/HomePage.js
+
+import React, { useState } from "react";
+
+// A small utility to remove extra whitespace from HTML, if needed.
+function compressHTML(html) {
+  return html.replace(/\n/g, "").replace(/>\s+</g, "><").trim();
+}
+
+// Equipment options by workout type
+const equipmentOptions = {
+  gym: [
+    "Dumbbells",
+    "Barbells",
+    "Kettlebells",
+    "Adjustable Bench",
+    "Squat Rack / Power Rack",
+    "Cable Machines",
+    "Leg Press Machine",
+    "Smith Machine",
+    "Treadmill",
+    "Elliptical Trainer",
+    "Stationary Bike",
+    "Rowing Machine",
+    "Lat Pulldown Machine",
+    "Chest Press Machine",
+    "Pec Deck Machine",
+    "Leg Extension Machine",
+    "Leg Curl Machine",
+    "Battle Ropes",
+    "TRX Suspension Trainer",
+    "Medicine Ball",
+    "Weight Plates",
+    "Cable Cross-Over Machine",
+    "Multi-Station Training Machine"
+  ],
+  home: [
+    "Yoga Mat",
+    "Resistance Bands",
+    "Stability Ball",
+    "Pull-up Bar",
+    "Adjustable Dumbbells",
+    "Kettlebells",
+    "Jump Rope",
+    "Foam Roller",
+    "Balance Board",
+    "Step Bench",
+    "Suspension Trainer (like TRX)",
+    "Ab Wheel",
+    "Pilates Ring",
+    "Doorway Row Bar",
+    "Mini Trampoline"
+  ],
+  bodyweight: [
+    "No Equipment",
+    "Pull-up Bar",
+    "Parallettes",
+    "Gymnastic Rings",
+    "Ab Roller",
+    "Suspension-Trainer (like TRX)",
+  ]
+};
+
+const HomePage = () => {
+  // State for the initial user goal prompt.
+  const [userGoals, setUserGoals] = useState("");
+  // Flag to control the display of the detailed form.
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  // State to hold form input values.
+  const [formData, setFormData] = useState({
+    gender: "",
+    age: "",
+    weight: "",
+    weightUnit: "kg",
+    height: "",
+    heightUnit: "cm",
+    fitnessGoal: "",
+    goalWeight: "",
+    workoutType: "",
+    fitnessLevel: "",
+    timeCommitment: "",
+    activityLevel: "",
+    specificGoals: "",
+    equipment: []
+  });
+  // States for displaying results from workout and meal plan generations.
+  const [workoutResult, setWorkoutResult] = useState("");
+  const [mealPlanResult, setMealPlanResult] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Handler for the initial "Continue" button.
+  const handleContinue = (e) => {
+    e.preventDefault();
+    if (!userGoals.trim()) {
+      alert("Please tell us about your goals or lifestyle to continue.");
+      return;
+    }
+    setDetailsVisible(true);
+  };
+
+  // Handler for form field changes.
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    // When the workout type changes, reset the equipment selection.
+    if (name === "workoutType") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        equipment: [] // clear equipment on change
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  // Handler for equipment checkbox changes.
+  const handleEquipmentChange = (e) => {
+    const { value, checked } = e.target;
+    setFormData((prev) => {
+      let updatedEquipment = [...prev.equipment];
+      if (checked) {
+        if (!updatedEquipment.includes(value)) {
+          updatedEquipment.push(value);
+        }
+      } else {
+        updatedEquipment = updatedEquipment.filter((item) => item !== value);
+      }
+      return { ...prev, equipment: updatedEquipment };
+    });
+  };
+
+  // Handler for generating the workout plan using AI.
+  const handleGenerateWorkout = async (e) => {
+    e.preventDefault();
+    // Basic validation.
+    if (!formData.age || formData.age <= 0) {
+      setWorkoutResult(
+        <p style={{ textAlign: "center", color: "red" }}>
+          Age must be a positive number.
+        </p>
+      );
+      return;
+    }
+    if (!formData.weight || formData.weight <= 0) {
+      setWorkoutResult(
+        <p style={{ textAlign: "center", color: "red" }}>
+          Current weight must be a positive number.
+        </p>
+      );
+      return;
+    }
+    if (!formData.fitnessGoal) {
+      setWorkoutResult(
+        <p style={{ textAlign: "center", color: "red" }}>
+          Please select a fitness goal.
+        </p>
+      );
+      return;
+    }
+
+    setLoading(true);
+    setWorkoutResult(
+      <p style={{ textAlign: "center", fontSize: "1.5rem", color: "#34495e" }}>
+        Generating your custom workout plan...
+      </p>
+    );
+
+    try {
+      const response = await fetch("/api/workouts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userGoals, formData })
+      });
+      const data = await response.json();
+      // The server returns the generated workout plan in data.workout.
+      setWorkoutResult(
+        <div dangerouslySetInnerHTML={{ __html: compressHTML(data.workout) }} />
+      );
+    } catch (error) {
+      console.error("Error generating workout plan:", error);
+      setWorkoutResult(
+        <p style={{ textAlign: "center", color: "red" }}>
+          Error generating workout plan. Please try again later.
+        </p>
+      );
+    }
+    setLoading(false);
+  };
+
+  // Handler for generating the meal plan using AI.
+  const handleGenerateMealPlan = async () => {
+    setLoading(true);
+    setMealPlanResult(
+      <p style={{ textAlign: "center", fontSize: "1.2rem", color: "#34495e" }}>
+        Generating your custom meal plan with AI...
+      </p>
+    );
+
+    try {
+      const response = await fetch("/api/meals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userGoals, formData })
+      });
+      const data = await response.json();
+      // The server returns the generated meal plan HTML in data.mealPlanHTML.
+      setMealPlanResult(
+        <div dangerouslySetInnerHTML={{ __html: compressHTML(data.mealPlanHTML) }} />
+      );
+    } catch (error) {
+      console.error("Error generating meal plan:", error);
+      setMealPlanResult(
+        <p style={{ textAlign: "center", color: "red" }}>
+          Error generating meal plan. Please try again later.
+        </p>
+      );
+    }
+    setLoading(false);
+  };
+
+  // Determine which equipment options to show based on the selected workout type.
+  let currentEquipmentOptions = [];
+  if (formData.workoutType) {
+    // For equipment, treat "bodyweight" as "home"
+    const typeKey =
+      formData.workoutType.toLowerCase() === "bodyweight"
+        ? "home"
+        : formData.workoutType.toLowerCase();
+    currentEquipmentOptions = equipmentOptions[typeKey] || [];
+  }
+
+  return (
+    
+    <div className="homepage-content container">
+      {/* Hero Section */}
+      <section className="hero" id="hero" aria-labelledby="hero-heading">
+        <div className="hero-container">
+          <h1 id="hero-heading">Your Personalized Fitness & Nutrition Journey</h1>
+          <p>
+            Share your lifestyle or fitness goals—for example, 'I work long hours and rarely have time to exercise,' 'I'm a mom who balances parenting and career responsibilities,' or 'Summer is coming and I want to get in shape' —and receive a workout and nutrition plan that's crafted specifically for your needs.
+          </p>
+          <div className="input-group">
+            <input
+              type="text"
+              id="userGoals"
+              placeholder="Share your fitness goals or lifestyle"
+              value={userGoals}
+              onChange={(e) => setUserGoals(e.target.value)}
+            />
+            <button id="continueDetails" onClick={handleContinue}>
+              Continue
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Details Section */}
+      {detailsVisible && (
+        <section id="detailsSection" className="visible">
+          <h2>Provide More Details to Personalize Your Plan</h2>
+          <form id="fitnessDetailsForm">
+            <div className="form-group">
+              <label htmlFor="gender">Gender:</label>
+              <select
+                id="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+              >
+                <option value="" disabled>
+                  Select your gender
+                </option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="age">Age:</label>
+              <input
+                type="number"
+                id="age"
+                name="age"
+                placeholder="Enter your age"
+                min="0"
+                value={formData.age}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="weight">Current Weight:</label>
+              <input
+                type="number"
+                id="weight"
+                name="weight"
+                placeholder="Enter your current weight"
+                min="0"
+                value={formData.weight}
+                onChange={handleChange}
+              />
+              <select
+                id="weightUnit"
+                name="weightUnit"
+                value={formData.weightUnit}
+                onChange={handleChange}
+              >
+                <option value="kg">kg</option>
+                <option value="lbs">lbs</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="height">Height:</label>
+              <input
+                type="number"
+                id="height"
+                name="height"
+                placeholder="Enter your height"
+                min="0"
+                value={formData.height}
+                onChange={handleChange}
+              />
+              <select
+                id="heightUnit"
+                name="heightUnit"
+                value={formData.heightUnit}
+                onChange={handleChange}
+              >
+                <option value="cm">cm</option>
+                <option value="ft">ft</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="fitnessGoal">Fitness Goal:</label>
+              <select
+                id="fitnessGoal"
+                name="fitnessGoal"
+                value={formData.fitnessGoal}
+                onChange={handleChange}
+              >
+                <option value="" disabled>
+                  Select your fitness goal
+                </option>
+                <option value="loseWeight">Lose Weight</option>
+                <option value="gainWeight">Gain Weight</option>
+                <option value="gainMuscle">Gain Muscle</option>
+                <option value="maintainWeight">Maintain Weight</option>
+              </select>
+            </div>
+
+            {(formData.fitnessGoal === "loseWeight" ||
+              formData.fitnessGoal === "gainWeight") && (
+              <div className="form-group" id="goalWeightInput">
+                <label htmlFor="goalWeight">Target Weight:</label>
+                <input
+                  type="number"
+                  id="goalWeight"
+                  name="goalWeight"
+                  placeholder="Enter your target weight"
+                  min="0"
+                  value={formData.goalWeight}
+                  onChange={handleChange}
+                />
+              </div>
+            )}
+
+            <div className="form-group">
+              <label htmlFor="workoutType">Workout Type:</label>
+              <select
+                id="workoutType"
+                name="workoutType"
+                value={formData.workoutType}
+                onChange={handleChange}
+              >
+                <option value="" disabled>
+                  Select workout type
+                </option>
+                <option value="bodyweight">Bodyweight</option>
+                <option value="home">Home</option>
+                <option value="gym">Gym</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="fitnessLevel">Fitness Level:</label>
+              <select
+                id="fitnessLevel"
+                name="fitnessLevel"
+                value={formData.fitnessLevel}
+                onChange={handleChange}
+              >
+                <option value="" disabled>
+                  Select Fitness Level
+                </option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="timeCommitment">
+                Time Commitment per Session:
+              </label>
+              <select
+                id="timeCommitment"
+                name="timeCommitment"
+                value={formData.timeCommitment}
+                onChange={handleChange}
+              >
+                <option value="" disabled>
+                  Select Time Commitment
+                </option>
+                <option value="10-20 minutes">10–20 minutes</option>
+                <option value="20-30 minutes">20–30 minutes</option>
+                <option value="30-45 minutes">30–45 minutes</option>
+                <option value="45-60 minutes">45–60 minutes</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="activityLevel">Activity Level:</label>
+              <select
+                id="activityLevel"
+                name="activityLevel"
+                value={formData.activityLevel}
+                onChange={handleChange}
+              >
+                <option value="" disabled>
+                  Select Activity Level
+                </option>
+                <option value="Sedentary">Sedentary</option>
+                <option value="Moderately Active">Moderately Active</option>
+                <option value="Very Active">Very Active</option>
+              </select>
+            </div>
+
+            <div className="form-group" id="equipmentContainer">
+              <label>Equipment Available:</label>
+              <div id="equipmentOptions">
+                {currentEquipmentOptions.length > 0 ? (
+                  currentEquipmentOptions.map((item) => (
+                    <div key={item}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={formData.equipment.includes(item)}
+                          onChange={handleEquipmentChange}
+                        />
+                        {item}
+                      </label>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ fontStyle: "italic", color: "#777" }}>
+                    {formData.workoutType
+                      ? "No equipment options available."
+                      : "Select a workout type to see equipment options."}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="specificGoals" style={{ color: "#34495e" }}>
+                Specific Fitness Goals:
+              </label>
+              <input
+                type="text"
+                id="specificGoals"
+                name="specificGoals"
+                placeholder="E.g., abs, toned legs, muscular arms"
+                value={formData.specificGoals}
+                onChange={handleChange}
+              />
+            </div>
+
+            <button
+              id="generateWorkout"
+              type="button"
+              onClick={handleGenerateWorkout}
+            >
+              Generate Workout
+            </button>
+          </form>
+          <div id="workoutResult">{workoutResult}</div>
+        </section>
+      )}
+
+      {/* Meal Plan Section */}
+      <section id="mealPlanContainer">
+        <div id="mealPlanResult">{mealPlanResult}</div>
+        {detailsVisible && (
+          <div style={{ marginTop: "1rem" }}>
+            <button
+              id="generateMealPlan"
+              className="meal-plan-btn"
+              onClick={handleGenerateMealPlan}
+            >
+              Generate Meal Plan
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* Features Section */}
+      <section className="features">
+        <h2>Why Choose Our AI-Powered Service?</h2>
+        <div className="features-grid">
+          <div className="card">
+            <img
+              src="https://via.placeholder.com/300x200?text=Workouts"
+              alt="Workouts"
+            />
+            <h3>Custom Workouts</h3>
+            <p>
+              Your workout plans are generated by our AI to perfectly match your
+              unique profile and goals.
+            </p>
+          </div>
+          <div className="card">
+            <img
+              src="https://via.placeholder.com/300x200?text=Meal+Plans"
+              alt="Meal Plans"
+            />
+            <h3>Personalized Meal Plans</h3>
+            <p>
+              Our AI creates diverse meal plans that suit your dietary needs and
+              flavor preferences.
+            </p>
+          </div>
+          <div className="card">
+            <img
+              src="https://via.placeholder.com/300x200?text=Progress"
+              alt="Tracking Progress"
+            />
+            <h3>Progress Tracking</h3>
+            <p>
+              Monitor your fitness journey and see your transformation over time
+              with our intuitive dashboard.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="howItWorks" className="how-it-works">
+        <h2>How It Works</h2>
+        <p>
+          Our AI connects with you to learn about your lifestyle and then
+          generates personalized workout and meal plans designed just for you.
+        </p>
+        <h3>Your Custom 7-Day Workout Plan</h3>
+        <ul>
+          <li>
+            <strong>Efficient Routines:</strong> Dynamic routines adapted to your
+            schedule.
+          </li>
+          <li>
+            <strong>Home & Gym Options:</strong> Exercises tailored for your
+            environment.
+          </li>
+          <li>
+            <strong>Balanced Recovery:</strong> Ensuring optimal results with
+            proper rest.
+          </li>
+        </ul>
+        <h3>Your Personalized Meal Plan</h3>
+        <ul>
+          <li>
+            <strong>Calorie & Macro Guidance:</strong> AI‑generated nutrition plans
+            based on your profile.
+          </li>
+          <li>
+            <strong>Diverse Recipes:</strong> Enjoy a variety of dishes crafted
+            for your tastes.
+          </li>
+        </ul>
+        <p>
+          Experience the future of fitness and nutrition with complete AI
+          personalization.
+        </p>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="cta" id="cta">
+        <div className="cta-container">
+          <h2>Take Charge of Your Health Today</h2>
+          <p>
+            Join a community of fitness enthusiasts transforming their lives
+            through AI-powered personalization.
+          </p>
+          <button id="startNow">Start Now</button>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default HomePage;

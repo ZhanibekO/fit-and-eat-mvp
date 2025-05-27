@@ -1,0 +1,290 @@
+[nodemon] restarting due to changes...
+[nodemon] starting `node server.js`
+Server running on http://localhost:3000
+User goals received: i want to be in better shape and have abs
+Workout Prompt Sent to OpenAI: Generate a personalized 7-day workout plan for weight loss based on the following details:
+- Gender: male
+- Age: 32
+- Current Weight: 78 kg
+- Height: 175 cm
+- Fitness Goal: loseWeight
+- Target Weight: 71
+- Workout Type: bodyweight
+- Fitness Level: Intermediate
+- Time Commitment per Session: 45-60 minutes
+- Activity Level: Moderately Active
+- Equipment Available: Pull-up Bar, Chair/Bench
+- Specific Goals: big legs, popping abs, obliques, wide back, wide shoulders, big forearms, big calves
+- Rest Preference: Sunday is a full rest day.
+
+Based on your fitness goals, your daily target is approximately 2264 calories per day. This includes around 170g protein, 226g carbohydrates, and 75g fat to fuel your workouts and support weight loss.
+For home and bodyweight workouts, provide a Tabata-style, time-based circuit training plan with specific exercise durations (e.g., 45 seconds per exercise) and rest intervals, incorporating any available equipment if provided.
+Additionally, target the following goals: big legs, popping abs, obliques, wide back, wide shoulders, big forearms, big calves. Include exercises that focus on these areas (e.g., core work for abs, compound lower-body movements for toned legs).
+
+Return a detailed 7-day workout plan as a valid JSON object in the following format:
+{
+  "Monday": {
+    "warmUp": "A 5-minute warm-up description",
+    "mainCircuit": [
+       "Exercise 1 – duration",
+       "Exercise 2 – duration",
+       "Exercise 3 – duration"
+    ],
+    "rest": "Rest instructions, e.g., '1 minute between exercises, 2 minutes after the circuit'",
+    "coolDown": "A 5-minute cool-down description"
+  },
+  "Tuesday": { ... },
+  ...,
+  "Saturday": { ... },
+  "Sunday": "Rest Day"
+}
+Ensure that you return only the JSON (without any additional text).
+Raw API Response: {
+  "id": "chatcmpl-BPhyZwlOi2gxRGY4Mkg61YE40hXcH",
+  "object": "chat.completion",
+  "created": 1745466943,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"Monday\": {\n    \"warmUp\": \"Start with a 5-minute jog in place to get your heart rate up\",\n    \"mainCircuit\": [\n       \"Bodyweight Squats - 45 seconds\",\n       \"Leg Raises - 45 seconds\",\n       \"Pull-ups - 45 seconds\",\n       \"Plank - 45 seconds\",\n       \"Chair Dips - 45 seconds\",\n       \"Forearm Plank - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Finish with a 5-minute stretch focusing on your legs, abs, and upper body\"\n  },\n  \"Tuesday\": {\n    \"warmUp\": \"Jump rope for 5 minutes to warm up your entire body\",\n    \"mainCircuit\": [\n       \"Mountain Climbers - 45 seconds\",\n       \"Russian Twists - 45 seconds\",\n       \"Wide Grip Push-ups - 45 seconds\",\n       \"Bicycle Crunches - 45 seconds\",\n       \"Reverse Lunges - 45 seconds\",\n       \"Calf Raises - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Cool down with a 5-minute yoga flow focusing on your core, back, and legs\"\n  },\n  \"Wednesday\": {\n    \"warmUp\": \"Do dynamic stretches for 5 minutes to prepare your muscles\",\n    \"mainCircuit\": [\n       \"Burpees - 45 seconds\",\n       \"Russian Twists with Weight (using a water bottle) - 45 seconds\",\n       \"Chin-ups - 45 seconds\",\n       \"Side Plank - 45 seconds (each side)\",\n       \"Superman - 45 seconds\",\n       \"Calf Raises on Stairs - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Finish with a 5-minute foam rolling session for your legs, abs, and back\"\n  },\n  \"Thursday\": {\n    \"warmUp\": \"March in place for 5 minutes to get your blood flowing\",\n    \"mainCircuit\": [\n       \"Jump Squats - 45 seconds\",\n       \"Hanging Leg Raises - 45 seconds\",\n       \"Diamond Push-ups - 45 seconds\",\n       \"Russian Twists with Medicine Ball - 45 seconds\",\n       \"Lunges - 45 seconds\",\n       \"Plank with Leg Lift - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Cool down with a 5-minute stretching routine for your legs, abs, and upper body\"\n  },\n  \"Friday\": {\n    \"warmUp\": \"Do high knees for 5 minutes to warm up your legs and core\",\n    \"mainCircuit\": [\n       \"Pistol Squats - 45 seconds\",\n       \"Leg Raises with Twist - 45 seconds\",\n       \"Wide Grip Pull-ups - 45 seconds\",\n       \"Russian Twists with Resistance Band - 45 seconds\",\n       \"Plank Shoulder Taps - 45 seconds\",\n       \"Calf Raises with Weight - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Finish with a 5-minute cool-down stretch for your legs, abs, and back\"\n  },\n  \"Saturday\": {\n    \"warmUp\": \"Jumping jacks for 5 minutes to warm up your entire body\",\n    \"mainCircuit\": [\n       \"Jump Lung",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "length"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 440,
+    "completion_tokens": 768,
+    "total_tokens": 1208,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+
+Generated Workout Plan: {
+  "Monday": {
+    "warmUp": "Start with a 5-minute jog in place to get your heart rate up",
+    "mainCircuit": [
+       "Bodyweight Squats - 45 seconds",
+       "Leg Raises - 45 seconds",
+       "Pull-ups - 45 seconds",
+       "Plank - 45 seconds",
+       "Chair Dips - 45 seconds",
+       "Forearm Plank - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Finish with a 5-minute stretch focusing on your legs, abs, and upper body"
+  },
+  "Tuesday": {
+    "warmUp": "Jump rope for 5 minutes to warm up your entire body",
+    "mainCircuit": [
+       "Mountain Climbers - 45 seconds",
+       "Russian Twists - 45 seconds",
+       "Wide Grip Push-ups - 45 seconds",
+       "Bicycle Crunches - 45 seconds",
+       "Reverse Lunges - 45 seconds",
+       "Calf Raises - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Cool down with a 5-minute yoga flow focusing on your core, back, and legs"
+  },
+  "Wednesday": {
+    "warmUp": "Do dynamic stretches for 5 minutes to prepare your muscles",
+    "mainCircuit": [
+       "Burpees - 45 seconds",
+       "Russian Twists with Weight (using a water bottle) - 45 seconds",
+       "Chin-ups - 45 seconds",
+       "Side Plank - 45 seconds (each side)",
+       "Superman - 45 seconds",
+       "Calf Raises on Stairs - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Finish with a 5-minute foam rolling session for your legs, abs, and back"
+  },
+  "Thursday": {
+    "warmUp": "March in place for 5 minutes to get your blood flowing",
+    "mainCircuit": [
+       "Jump Squats - 45 seconds",
+       "Hanging Leg Raises - 45 seconds",
+       "Diamond Push-ups - 45 seconds",
+       "Russian Twists with Medicine Ball - 45 seconds",
+       "Lunges - 45 seconds",
+       "Plank with Leg Lift - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Cool down with a 5-minute stretching routine for your legs, abs, and upper body"
+  },
+  "Friday": {
+    "warmUp": "Do high knees for 5 minutes to warm up your legs and core",
+    "mainCircuit": [
+       "Pistol Squats - 45 seconds",
+       "Leg Raises with Twist - 45 seconds",
+       "Wide Grip Pull-ups - 45 seconds",
+       "Russian Twists with Resistance Band - 45 seconds",
+       "Plank Shoulder Taps - 45 seconds",
+       "Calf Raises with Weight - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Finish with a 5-minute cool-down stretch for your legs, abs, and back"
+  },
+  "Saturday": {
+    "warmUp": "Jumping jacks for 5 minutes to warm up your entire body",
+    "mainCircuit": [
+       "Jump Lung
+Workout Prompt Sent to OpenAI: Generate a personalized 7-day workout plan for weight loss based on the following details:
+- Gender: male
+- Age: 32
+- Current Weight: 78 kg
+- Height: 175 cm
+- Fitness Goal: loseWeight
+- Target Weight: 71
+- Workout Type: bodyweight
+- Fitness Level: Intermediate
+- Time Commitment per Session: 45-60 minutes
+- Activity Level: Moderately Active
+- Equipment Available: Pull-up Bar, Chair/Bench
+- Specific Goals: big legs, popping abs, obliques, wide back, wide shoulders, big forearms, big calves
+- Rest Preference: Sunday is a full rest day.
+
+Based on your fitness goals, your daily target is approximately 2264 calories per day. This includes around 170g protein, 226g carbohydrates, and 75g fat to fuel your workouts and support weight loss.
+For home and bodyweight workouts, provide a Tabata-style, time-based circuit training plan with specific exercise durations (e.g., 45 seconds per exercise) and rest intervals, incorporating any available equipment if provided.
+Additionally, target the following goals: big legs, popping abs, obliques, wide back, wide shoulders, big forearms, big calves. Include exercises that focus on these areas (e.g., core work for abs, compound lower-body movements for toned legs).
+
+Return a detailed 7-day workout plan as a valid JSON object in the following format:
+{
+  "Monday": {
+    "warmUp": "A 5-minute warm-up description",
+    "mainCircuit": [
+       "Exercise 1 – duration",
+       "Exercise 2 – duration",
+       "Exercise 3 – duration"
+    ],
+    "rest": "Rest instructions, e.g., '1 minute between exercises, 2 minutes after the circuit'",
+    "coolDown": "A 5-minute cool-down description"
+  },
+  "Tuesday": { ... },
+  ...,
+  "Saturday": { ... },
+  "Sunday": "Rest Day"
+}
+Ensure that you return only the JSON (without any additional text).
+Raw API Response: {
+  "id": "chatcmpl-BPhz2zDt5AKHuN7vzb1IvZh5uKhY0",
+  "object": "chat.completion",
+  "created": 1745466972,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"Monday\": {\n    \"warmUp\": \"Start with a 5-minute jog in place to get your heart rate up\",\n    \"mainCircuit\": [\n       \"Bodyweight Squats - 45 seconds\",\n       \"Leg Raises - 45 seconds\",\n       \"Pull-ups - 45 seconds\",\n       \"Plank - 45 seconds\",\n       \"Chair Dips - 45 seconds\",\n       \"Forearm Plank - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Finish with a 5-minute stretching routine focusing on your legs, abs, and upper body\"\n  },\n  \"Tuesday\": {\n    \"warmUp\": \"Jump rope for 5 minutes to warm up your entire body\",\n    \"mainCircuit\": [\n       \"Reverse Lunges - 45 seconds each leg\",\n       \"Russian Twists - 45 seconds\",\n       \"Wide Grip Push-ups - 45 seconds\",\n       \"Side Plank - 45 seconds each side\",\n       \"Mountain Climbers - 45 seconds\",\n       \"Calf Raises - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Cool down with a 5-minute stretching routine focusing on your legs, abs, and obliques\"\n  },\n  \"Wednesday\": {\n    \"warmUp\": \"Do dynamic stretches for 5 minutes to prepare your muscles for the workout\",\n    \"mainCircuit\": [\n       \"Bulgarian Split Squats - 45 seconds each leg\",\n       \"Flutter Kicks - 45 seconds\",\n       \"Chin-ups - 45 seconds\",\n       \"Russian Twists with Weight - 45 seconds\",\n       \"Superman Hold - 45 seconds\",\n       \"Seated Calf Raises - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Finish with a 5-minute stretching routine targeting your legs, back, and calves\"\n  },\n  \"Thursday\": {\n    \"warmUp\": \"Begin with a 5-minute jog in place to warm up your muscles\",\n    \"mainCircuit\": [\n       \"Pistol Squats - 45 seconds each leg\",\n       \"Hollow Body Hold - 45 seconds\",\n       \"Wide Grip Pull-ups - 45 seconds\",\n       \"Russian Twists with Medicine Ball - 45 seconds\",\n       \"Side Plank with Leg Raise - 45 seconds each side\",\n       \"Standing Calf Raises - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Cool down with a 5-minute stretching routine focusing on your legs, abs, and obliques\"\n  },\n  \"Friday\": {\n    \"warmUp\": \"Jump rope for 5 minutes to get your heart rate up and warm up your entire body\",\n    \"mainCircuit\": [\n       \"Jump Squats - 45 seconds\",\n       \"Russian Twists with Weight - 45 seconds\",\n       \"Diamond Push-ups - 45 seconds\",\n       \"Plank with Knee to Elbow - 45 seconds\",\n       \"Close Grip Pull-ups - 45 seconds\",\n       \"Seated Leg Raises - 45 seconds\"\n    ],\n    \"rest\": \"Rest for 1 minute between exercises, 2 minutes after the circuit\",\n    \"coolDown\": \"Finish with a 5-minute stretching routine targeting your legs, abs, and arms\"\n  },\n  \"Saturday\": {\n    \"warmUp\": \"Do dynamic stretches for 5 minutes to",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "length"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 440,
+    "completion_tokens": 768,
+    "total_tokens": 1208,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+
+Generated Workout Plan: {
+  "Monday": {
+    "warmUp": "Start with a 5-minute jog in place to get your heart rate up",
+    "mainCircuit": [
+       "Bodyweight Squats - 45 seconds",
+       "Leg Raises - 45 seconds",
+       "Pull-ups - 45 seconds",
+       "Plank - 45 seconds",
+       "Chair Dips - 45 seconds",
+       "Forearm Plank - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Finish with a 5-minute stretching routine focusing on your legs, abs, and upper body"
+  },
+  "Tuesday": {
+    "warmUp": "Jump rope for 5 minutes to warm up your entire body",
+    "mainCircuit": [
+       "Reverse Lunges - 45 seconds each leg",
+       "Russian Twists - 45 seconds",
+       "Wide Grip Push-ups - 45 seconds",
+       "Side Plank - 45 seconds each side",
+       "Mountain Climbers - 45 seconds",
+       "Calf Raises - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Cool down with a 5-minute stretching routine focusing on your legs, abs, and obliques"
+  },
+  "Wednesday": {
+    "warmUp": "Do dynamic stretches for 5 minutes to prepare your muscles for the workout",
+    "mainCircuit": [
+       "Bulgarian Split Squats - 45 seconds each leg",
+       "Flutter Kicks - 45 seconds",
+       "Chin-ups - 45 seconds",
+       "Russian Twists with Weight - 45 seconds",
+       "Superman Hold - 45 seconds",
+       "Seated Calf Raises - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Finish with a 5-minute stretching routine targeting your legs, back, and calves"
+  },
+  "Thursday": {
+    "warmUp": "Begin with a 5-minute jog in place to warm up your muscles",
+    "mainCircuit": [
+       "Pistol Squats - 45 seconds each leg",
+       "Hollow Body Hold - 45 seconds",
+       "Wide Grip Pull-ups - 45 seconds",
+       "Russian Twists with Medicine Ball - 45 seconds",
+       "Side Plank with Leg Raise - 45 seconds each side",
+       "Standing Calf Raises - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Cool down with a 5-minute stretching routine focusing on your legs, abs, and obliques"
+  },
+  "Friday": {
+    "warmUp": "Jump rope for 5 minutes to get your heart rate up and warm up your entire body",
+    "mainCircuit": [
+       "Jump Squats - 45 seconds",
+       "Russian Twists with Weight - 45 seconds",
+       "Diamond Push-ups - 45 seconds",
+       "Plank with Knee to Elbow - 45 seconds",
+       "Close Grip Pull-ups - 45 seconds",
+       "Seated Leg Raises - 45 seconds"
+    ],
+    "rest": "Rest for 1 minute between exercises, 2 minutes after the circuit",
+    "coolDown": "Finish with a 5-minute stretching routine targeting your legs, abs, and arms"
+  },
+  "Saturday": {
+    "warmUp": "Do dynamic stretches for 5 minutes to

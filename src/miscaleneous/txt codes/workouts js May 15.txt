@@ -1,0 +1,832 @@
+// src/pages/Workouts.js
+import React, { useState, useEffect, useRef } from "react";
+import SearchBar from "../components/SearchBar";
+
+const Workouts = () => {
+  // Core data state
+  const [workouts, setWorkouts] = useState([]);
+  const [filteredWorkouts, setFilteredWorkouts] = useState([]);
+  const [recommendedWorkouts, setRecommendedWorkouts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  // Advanced filters: difficulty, muscleGroup, intensity, equipment, & duration
+  const [filters, setFilters] = useState({
+    difficulty: "all",
+    muscleGroup: "all",
+    intensity: "all",
+    equipment: "all",
+    duration: "all",
+  });
+  const [sortOption, setSortOption] = useState("default");
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Detailed workout modal state
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+
+  // Custom Routine Builder Modal state
+  const [showRoutineModal, setShowRoutineModal] = useState(false);
+  const [selectedRoutineWorkouts, setSelectedRoutineWorkouts] = useState([]);
+  const [routineTimer, setRoutineTimer] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const timerRef = useRef(null);
+
+  // -----------------------
+  // Fetch workouts data from API
+  // -----------------------
+  useEffect(() => {
+    const fetchWorkouts = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/workouts");
+        const data = await res.json();
+        if (data && data.workouts) {
+          setWorkouts(data.workouts);
+          setFilteredWorkouts(data.workouts);
+        } else {
+          setError("No workouts data received.");
+        }
+      } catch (err) {
+        console.error("Error fetching workouts:", err);
+        setError("Failed to load workouts. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWorkouts();
+  }, []);
+
+  // -----------------------
+  // Fetch recommended workouts
+  // -----------------------
+  useEffect(() => {
+    const fetchRecommended = async () => {
+      try {
+        const res = await fetch("/api/workouts/recommendations");
+        const data = await res.json();
+        if (data && data.recommended) {
+          setRecommendedWorkouts(data.recommended);
+        }
+      } catch (err) {
+        console.error("Error fetching recommended workouts:", err);
+      }
+    };
+    fetchRecommended();
+  }, []);
+
+  // -----------------------
+  // Filtering & Sorting: reset page and refilter when search, filters, sortOption, or workouts change
+  // -----------------------
+  useEffect(() => {
+    setCurrentPage(1);
+    filterWorkouts(searchQuery, filters, sortOption);
+  }, [searchQuery, filters, sortOption, workouts]);
+
+  const handleSearch = (query) => setSearchQuery(query);
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+  };
+
+  const filterWorkouts = (query, filters, sortOpt) => {
+    let filtered = workouts;
+    // Search by workout name
+    if (query) {
+      filtered = filtered.filter((workout) =>
+        workout.name.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+    // Filter by difficulty
+    if (filters.difficulty !== "all") {
+      filtered = filtered.filter(
+        (workout) =>
+          workout.difficulty &&
+          workout.difficulty.toLowerCase() === filters.difficulty.toLowerCase()
+      );
+    }
+    // Filter by muscle group
+    if (filters.muscleGroup !== "all") {
+      filtered = filtered.filter(
+        (workout) =>
+          workout.muscleGroup &&
+          workout.muscleGroup.toLowerCase() === filters.muscleGroup.toLowerCase()
+      );
+    }
+    // Filter by intensity
+    if (filters.intensity !== "all") {
+      filtered = filtered.filter(
+        (workout) =>
+          workout.intensity &&
+          workout.intensity.toLowerCase() === filters.intensity.toLowerCase()
+      );
+    }
+    // Filter by equipment (assumes workout.equipment is an array)
+    if (filters.equipment !== "all") {
+      filtered = filtered.filter(
+        (workout) =>
+          workout.equipment &&
+          workout.equipment.map((eq) => eq.toLowerCase()).includes(filters.equipment.toLowerCase())
+      );
+    }
+    // Filter by duration (assumes workout.duration in minutes)
+    if (filters.duration !== "all") {
+      if (filters.duration === "under30") {
+        filtered = filtered.filter(
+          (workout) => workout.duration && workout.duration < 30
+        );
+      } else if (filters.duration === "30to60") {
+        filtered = filtered.filter(
+          (workout) =>
+            workout.duration && workout.duration >= 30 && workout.duration <= 60
+        );
+      } else if (filters.duration === "over60") {
+        filtered = filtered.filter(
+          (workout) => workout.duration && workout.duration > 60
+        );
+      }
+    }
+    // Sorting
+    if (sortOpt === "popularity") {
+      filtered.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    } else if (sortOpt === "rating") {
+      filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortOpt === "duration") {
+      filtered.sort((a, b) => (a.duration || 0) - (b.duration || 0));
+    }
+    setFilteredWorkouts(filtered);
+  };
+
+  // -----------------------
+  // Pagination Logic
+  // -----------------------
+  const indexOfLastWorkout = currentPage * itemsPerPage;
+  const indexOfFirstWorkout = indexOfLastWorkout - itemsPerPage;
+  const currentWorkouts = filteredWorkouts.slice(indexOfFirstWorkout, indexOfLastWorkout);
+  const totalPages = Math.ceil(filteredWorkouts.length / itemsPerPage);
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <div style={{ textAlign: "center", marginTop: "1rem" }}>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index + 1}
+            onClick={() => handlePageChange(index + 1)}
+            style={{
+              margin: "0 0.25rem",
+              padding: "0.5rem 1rem",
+              backgroundColor: currentPage === index + 1 ? "#27ae60" : "#eee",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  // -----------------------
+  // Detailed Workout Modal Actions
+  // -----------------------
+  const openWorkoutModal = (workout) => setSelectedWorkout(workout);
+  const closeWorkoutModal = () => setSelectedWorkout(null);
+
+  // If no video URL in workout, open a YouTube search for a workout tutorial.
+  const searchYouTubeVideo = (workoutName) => {
+    const query = encodeURIComponent(workoutName + " workout tutorial");
+    window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank");
+  };
+
+  // Clicking on an equipment tag updates the equipment filter.
+  const handleEquipmentTagClick = (eq) => {
+    setFilters((prev) => ({ ...prev, equipment: eq.toLowerCase() }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Placeholder actions for favorites and sharing.
+  const handleAddToFavorites = (workout) => alert(`Added "${workout.name}" to favorites!`);
+  const handleShareWorkout = (workout) => alert(`Shared "${workout.name}"!`);
+
+  // Print current workout (opens a print‑friendly window).
+  const printWorkout = () => {
+    if (!selectedWorkout) return;
+    const printContent = document.getElementById("printableWorkout").innerHTML;
+    const printWindow = window.open("", "", "width=800,height=600");
+    printWindow.document.write(`
+      <html><head>
+      <title>${selectedWorkout.name} - Workout</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { color: #34495e; }
+      </style>
+      </head><body>
+      ${printContent}
+      </body></html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+
+  // -----------------------
+  // Custom Routine Builder Modal and Timer Functions
+  // -----------------------
+  const openRoutineModal = () => {
+    setShowRoutineModal(true);
+    setSelectedRoutineWorkouts([]); // Reset selections
+    setRoutineTimer(0);
+    setTimerRunning(false);
+  };
+  const closeRoutineModal = () => {
+    setShowRoutineModal(false);
+    stopTimer();
+  };
+  const handleRoutineWorkoutSelection = (workout, isChecked) => {
+    if (isChecked) {
+      setSelectedRoutineWorkouts((prev) => [...prev, workout]);
+    } else {
+      setSelectedRoutineWorkouts((prev) => prev.filter((w) => w.id !== workout.id));
+    }
+  };
+  const startTimer = () => {
+    if (timerRunning) return;
+    setTimerRunning(true);
+    timerRef.current = setInterval(() => {
+      setRoutineTimer((prev) => prev + 1);
+    }, 1000);
+  };
+  const stopTimer = () => {
+    setTimerRunning(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+  const resetTimer = () => {
+    stopTimer();
+    setRoutineTimer(0);
+  };
+
+  const renderRoutineModal = () => (
+    <div
+      className="modal-overlay"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+      }}
+      onClick={closeRoutineModal}
+    >
+      <div
+        className="modal-content"
+        style={{
+          backgroundColor: "#fff",
+          padding: "2rem",
+          borderRadius: "8px",
+          maxWidth: "800px",
+          width: "90%",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          position: "relative",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={closeRoutineModal}
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            backgroundColor: "transparent",
+            border: "none",
+            fontSize: "1.5rem",
+            cursor: "pointer",
+          }}
+        >
+          &times;
+        </button>
+        <h2 style={{ color: "#34495e" }}>Custom Routine Builder</h2>
+        <p>Select workouts to include in your custom routine:</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {workouts.map((w) => (
+            <label key={w.id}>
+              <input
+                type="checkbox"
+                onChange={(e) =>
+                  handleRoutineWorkoutSelection(w, e.target.checked)
+                }
+              />
+              {w.name}
+            </label>
+          ))}
+        </div>
+        {selectedRoutineWorkouts.length > 0 && (
+          <div style={{ marginTop: "1rem" }}>
+            <h3>Selected Workouts:</h3>
+            <ul>
+              {selectedRoutineWorkouts.map((w) => (
+                <li key={w.id}>{w.name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div style={{ marginTop: "1rem" }}>
+          <h3>Routine Timer</h3>
+          <p>
+            Time Elapsed:{" "}
+            {new Date(routineTimer * 1000).toISOString().substr(11, 8)}
+          </p>
+          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            {!timerRunning ? (
+              <button
+                onClick={startTimer}
+                style={{
+                  padding: "0.5rem 1rem",
+                  backgroundColor: "#27ae60",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Start Timer
+              </button>
+            ) : (
+              <button
+                onClick={stopTimer}
+                style={{
+                  padding: "0.5rem 1rem",
+                  backgroundColor: "#c0392b",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Stop Timer
+              </button>
+            )}
+            <button
+              onClick={resetTimer}
+              style={{
+                padding: "0.5rem 1rem",
+                backgroundColor: "#7f8c8d",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Reset Timer
+            </button>
+          </div>
+        </div>
+        <div style={{ marginTop: "1rem" }}>
+          <button
+            onClick={() => alert("Custom routine exported (placeholder)!")}
+            style={{
+              padding: "0.5rem 1rem",
+              backgroundColor: "#34495e",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Print/Export Routine
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // -----------------------
+  // Render Main Component
+  // -----------------------
+  return (
+    <div className="workouts-page" style={{ display: "flex", flexWrap: "wrap" }}>
+      {/* Custom Routine Builder Button */}
+      <div style={{ width: "100%", textAlign: "center", padding: "1rem" }}>
+        <button
+          onClick={openRoutineModal}
+          style={{
+            padding: "0.75rem 1.5rem",
+            backgroundColor: "#8e44ad",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Create Custom Workout Routine
+        </button>
+      </div>
+
+      {/* Recommended Workouts Carousel */}
+      {recommendedWorkouts.length > 0 && (
+        <div style={{ width: "100%", marginBottom: "2rem", padding: "1rem" }}>
+          <h2 style={{ color: "#34495e" }}>Recommended for You</h2>
+          <div style={{ display: "flex", overflowX: "auto", gap: "1rem" }}>
+            {recommendedWorkouts.map((workout) => (
+              <div
+                key={workout.id || workout.name}
+                style={{
+                  minWidth: "200px",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  padding: "0.5rem",
+                  backgroundColor: "#fff",
+                  cursor: "pointer",
+                }}
+                onClick={() => openWorkoutModal(workout)}
+              >
+                {workout.image && (
+                  <img
+                    src={workout.image}
+                    alt={workout.name}
+                    style={{ width: "100%", borderRadius: "6px" }}
+                  />
+                )}
+                <h4 style={{ margin: "0.5rem 0", color: "#34495e" }}>
+                  {workout.name}
+                </h4>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Main Content Column */}
+      <div style={{ flex: "1 1 600px", padding: "1rem" }}>
+        <h2 style={{ color: "#34495e", marginBottom: "1rem" }}>
+          Workout Library
+        </h2>
+        <SearchBar onSearch={handleSearch} />
+
+        {/* Advanced Filters */}
+        <div style={{ marginBottom: "1rem" }}>
+          <div style={{ marginBottom: "0.5rem" }}>
+            <label htmlFor="difficulty" style={{ marginRight: "0.5rem" }}>
+              Difficulty:
+            </label>
+            <select
+              name="difficulty"
+              id="difficulty"
+              value={filters.difficulty}
+              onChange={handleFilterChange}
+            >
+              <option value="all">All</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div style={{ marginBottom: "0.5rem" }}>
+            <label htmlFor="muscleGroup" style={{ marginRight: "0.5rem" }}>
+              Muscle Group:
+            </label>
+            <select
+              name="muscleGroup"
+              id="muscleGroup"
+              value={filters.muscleGroup}
+              onChange={handleFilterChange}
+            >
+              <option value="all">All</option>
+              <option value="chest">Chest</option>
+              <option value="back">Back</option>
+              <option value="legs">Legs</option>
+              <option value="core">Core</option>
+              <option value="shoulders">Shoulders</option>
+              <option value="arms">Arms</option>
+            </select>
+          </div>
+          <div style={{ marginBottom: "0.5rem" }}>
+            <label htmlFor="intensity" style={{ marginRight: "0.5rem" }}>
+              Intensity:
+            </label>
+            <select
+              name="intensity"
+              id="intensity"
+              value={filters.intensity}
+              onChange={handleFilterChange}
+            >
+              <option value="all">All</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div style={{ marginBottom: "0.5rem" }}>
+            <label htmlFor="equipment" style={{ marginRight: "0.5rem" }}>
+              Equipment:
+            </label>
+            <select
+              name="equipment"
+              id="equipment"
+              value={filters.equipment}
+              onChange={handleFilterChange}
+            >
+              <option value="all">All</option>
+              <option value="dumbbells">Dumbbells</option>
+              <option value="barbell">Barbell</option>
+              <option value="machine">Machine</option>
+              <option value="resistance bands">Resistance Bands</option>
+              <option value="kettlebells">Kettlebells</option>
+              <option value="bodyweight">Bodyweight</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div style={{ marginBottom: "0.5rem" }}>
+            <label htmlFor="duration" style={{ marginRight: "0.5rem" }}>
+              Duration:
+            </label>
+            <select
+              name="duration"
+              id="duration"
+              value={filters.duration}
+              onChange={handleFilterChange}
+            >
+              <option value="all">All</option>
+              <option value="under30">Under 30 minutes</option>
+              <option value="30to60">30-60 minutes</option>
+              <option value="over60">Over 60 minutes</option>
+            </select>
+          </div>
+          <div style={{ marginBottom: "0.5rem" }}>
+            <label htmlFor="sort" style={{ marginRight: "0.5rem" }}>
+              Sort By:
+            </label>
+            <select name="sort" id="sort" value={sortOption} onChange={handleSortChange}>
+              <option value="default">Default</option>
+              <option value="popularity">Popularity</option>
+              <option value="rating">Rating</option>
+              <option value="duration">Duration</option>
+            </select>
+          </div>
+        </div>
+
+        {loading && <p style={{ textAlign: "center" }}>Loading workouts...</p>}
+        {error && <p style={{ textAlign: "center", color: "red" }}>{error}</p>}
+        {!loading && !error && filteredWorkouts.length === 0 && (
+          <p style={{ textAlign: "center" }}>No workouts found.</p>
+        )}
+
+        {/* Workout Cards */}
+        <div className="workout-list" style={{ marginTop: "1rem" }}>
+          {currentWorkouts.map((workout) => (
+            <div
+              key={workout.id || workout.name}
+              className="workout-card"
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                padding: "1rem",
+                marginBottom: "1rem",
+                backgroundColor: "#fff",
+                cursor: "pointer",
+              }}
+              onClick={() => openWorkoutModal(workout)}
+            >
+              {workout.image && (
+                <img
+                  src={workout.image}
+                  alt={workout.name}
+                  style={{ width: "100%", borderRadius: "6px", marginBottom: "0.5rem" }}
+                />
+              )}
+              <h3 style={{ color: "#34495e" }}>{workout.name}</h3>
+              {workout.description && <p>{workout.description}</p>}
+              {workout.rating && (
+                <p style={{ fontSize: "0.9rem", color: "#f39c12" }}>
+                  Rating: {workout.rating} / 5
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+        {renderPagination()}
+      </div>
+
+      {/* Sidebar with Advanced Filters Info */}
+      <div
+        style={{
+          width: "250px",
+          minWidth: "200px",
+          padding: "1rem",
+          borderLeft: "1px solid #ccc",
+          backgroundColor: "#f7f7f7",
+        }}
+      >
+        <h3 style={{ color: "#34495e" }}>Advanced Filters</h3>
+        <p>
+          Refine your search by selecting difficulty, muscle group, intensity, equipment, and duration.
+        </p>
+      </div>
+
+      {/* Detailed Workout Modal */}
+      {selectedWorkout && (
+        <div
+          className="modal-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={closeWorkoutModal}
+        >
+          <div
+            className="modal-content"
+            id="printableWorkout"
+            style={{
+              backgroundColor: "#fff",
+              padding: "2rem",
+              borderRadius: "8px",
+              maxWidth: "600px",
+              width: "90%",
+              position: "relative",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeWorkoutModal}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                backgroundColor: "transparent",
+                border: "none",
+                fontSize: "1.5rem",
+                cursor: "pointer",
+              }}
+            >
+              &times;
+            </button>
+            {selectedWorkout.image && (
+              <img
+                src={selectedWorkout.image}
+                alt={selectedWorkout.name}
+                style={{ width: "100%", borderRadius: "6px", marginBottom: "1rem" }}
+              />
+            )}
+            <h2 style={{ color: "#34495e" }}>{selectedWorkout.name}</h2>
+            {selectedWorkout.videoUrl ? (
+              <div style={{ marginBottom: "1rem" }}>
+                <h4>Video Tutorial:</h4>
+                <iframe
+                  width="100%"
+                  height="315"
+                  src={selectedWorkout.videoUrl}
+                  title="Video Tutorial"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            ) : (
+              <button
+                onClick={() => searchYouTubeVideo(selectedWorkout.name)}
+                style={{
+                  marginBottom: "1rem",
+                  padding: "0.5rem 1rem",
+                  backgroundColor: "#2980b9",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Search YouTube for Video
+              </button>
+            )}
+            {selectedWorkout.description && <p>{selectedWorkout.description}</p>}
+            {selectedWorkout.instructions && (
+              <div>
+                <h4>Instructions:</h4>
+                <ol>
+                  {selectedWorkout.instructions.map((step, idx) => (
+                    <li key={idx}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
+            {selectedWorkout.equipment && selectedWorkout.equipment.length > 0 && (
+              <div>
+                <h4>Required Equipment:</h4>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                  {selectedWorkout.equipment.map((eq, idx) => (
+                    <span
+                      key={idx}
+                      onClick={() => handleEquipmentTagClick(eq)}
+                      style={{
+                        backgroundColor: "#eee",
+                        padding: "0.3rem 0.6rem",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      {eq}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedWorkout.safety && (
+              <div>
+                <h4>Safety Tips:</h4>
+                <p>{selectedWorkout.safety}</p>
+              </div>
+            )}
+            {selectedWorkout.rating && (
+              <p style={{ fontSize: "0.9rem", color: "#f39c12" }}>
+                Rating: {selectedWorkout.rating} / 5
+              </p>
+            )}
+            {/* Action Buttons for the detailed modal */}
+            <div
+              style={{
+                marginTop: "1rem",
+                display: "flex",
+                gap: "1rem",
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={() => handleAddToFavorites(selectedWorkout)}
+                style={{
+                  padding: "0.5rem 1rem",
+                  backgroundColor: "#e67e22",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Add to Favorites
+              </button>
+              <button
+                onClick={() => handleShareWorkout(selectedWorkout)}
+                style={{
+                  padding: "0.5rem 1rem",
+                  backgroundColor: "#2980b9",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Share Workout
+              </button>
+              <button
+                onClick={printWorkout}
+                style={{
+                  padding: "0.5rem 1rem",
+                  backgroundColor: "#7f8c8d",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Print Workout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Routine Builder Modal */}
+      {showRoutineModal && renderRoutineModal()}
+    </div>
+  );
+};
+
+export default Workouts;

@@ -1,0 +1,305 @@
+// Utility functions
+function setLoadingMessage(message) {
+  document.getElementById("workoutResult").innerHTML = `
+    <p style="text-align: center; font-size: 1.5rem; color: #34495e;">${message}</p>`;
+}
+
+function setErrorMessage(error) {
+  const errorDisplay = document.getElementById("mealPlanError");
+  if (!errorDisplay) {
+    const mealPlanSection = document.getElementById("mealPlanSection");
+    mealPlanSection.insertAdjacentHTML(
+      "beforeend",
+      `<div id="mealPlanError" style="color: red; margin-top: 10px;">${error}</div>`
+    );
+  } else {
+    errorDisplay.innerHTML = error;
+  }
+}
+
+// Event listener for continuing to details section
+document.getElementById("continueDetails").addEventListener("click", function () {
+  const userGoals = document.getElementById("userGoals").value.trim();
+  const warningEl = document.getElementById("goalsWarning");
+
+  if (userGoals === "") {
+    warningEl.style.display = "block";
+    return;
+  }
+  warningEl.style.display = "none";
+
+  document.getElementById("detailsSection").style.display = "block";
+  console.log("User goals provided. Details section is now visible.");
+});
+
+// Show or hide weight goal input based on fitness goals
+document.getElementById("fitnessGoal").addEventListener("change", function () {
+  const goalInput = document.getElementById("goalWeightInput");
+  const selectedGoal = this.value;
+  if (selectedGoal === "gainWeight" || selectedGoal === "loseWeight") {
+    goalInput.style.display = "block";
+    console.log("Weight goal input is now visible.");
+  } else {
+    goalInput.style.display = "none";
+    console.log("Weight goal input is now hidden.");
+  }
+});
+
+// Workout plan generation
+document.getElementById("generateWorkout").addEventListener("click", async function () {
+  const workoutResult = document.getElementById("workoutResult");
+  setLoadingMessage("Please wait while we generate your custom workout plan...");
+  workoutResult.style.display = "block";
+
+  const userInput = {
+    gender: document.getElementById("gender").value,
+    age: document.getElementById("age").value,
+    weight: document.getElementById("weight").value,
+    weightUnit: document.getElementById("weightUnit").value,
+    height: document.getElementById("height").value,
+    heightUnit: document.getElementById("heightUnit").value,
+    fitnessGoal: document.getElementById("fitnessGoal").value,
+    goalWeight: document.getElementById("goalWeight").value,
+    workoutType: document.getElementById("workoutType").value,
+    dailyCommitment: document.getElementById("dailyCommitment")?.value || "Not provided",
+    weeklyCommitment: document.getElementById("weeklyCommitment")?.value || "Not provided",
+    lifestyle: document.getElementById("userGoals").value.trim(),
+  };
+
+  console.log("User Input Sent to Server:", userInput);
+
+  try {
+    const res = await fetch("/generate-workout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userInput),
+    });
+
+    const data = await res.json();
+    console.log("Complete Server Response:", data);
+
+    if (data.error) {
+      setErrorMessage("Error generating workout plan. Please try again.");
+      console.error("Server Error:", data.error);
+      return;
+    }
+
+    const lifestyleMessage = `
+      <p style="text-align: left; font-size: 1.1rem; color: #34495e;">
+        ${generateEncouragingMessage(userInput.lifestyle)}
+      </p>`;
+    const workoutPlanHTML = data.workout
+      .split("Day")
+      .slice(1)
+      .map((day, index) => {
+        const [dayHeader, ...exercises] = day.split("\n");
+        return `
+          <div style="margin-bottom: 15px;">
+            <h3 style="text-align: left; font-size: 1.2rem; color: #34495e;">Day ${index + 1}: ${dayHeader.trim()}</h3>
+            <ul style="text-align: left; font-size: 1rem; color: #2c3e50; line-height: 1.6; padding-left: 20px;">
+              ${exercises.filter(exercise => exercise.trim() !== "").map(exercise => `<li>${exercise.trim()}</li>`).join("")}
+            </ul>
+          </div>`;
+      }).join("");
+
+    workoutResult.innerHTML = `
+      ${lifestyleMessage}
+      <h2 style="text-align: left; font-size: 1.4rem; color: #2c3e50;">Your Workout Plan:</h2>
+      <div style="background-color: #f4f7fc; padding: 20px; border-radius: 8px;">
+        ${workoutPlanHTML}
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <p style="font-size: 1.2rem; color: #34495e;">Would you like to generate your custom meal plan?</p>
+        <button id="generateMealPrompt" style="padding: 10px 20px; font-size: 1rem; border-radius: 5px; background-color: #2c3e50; color: #fff; border: none; cursor: pointer;">I want to see my custom meal plan</button>
+      </div>`;
+
+    // Add event listener for the meal plan button
+    document.getElementById("generateMealPrompt").addEventListener("click", showMealPlanQuestions);
+    console.log("Workout plan displayed successfully.");
+  } catch (error) {
+    console.error("Error Fetching Workout Plan:", error);
+    setErrorMessage("Error generating workout plan. Please try again.");
+  }
+});
+
+// Helper function for encouraging messages
+function generateEncouragingMessage(lifestyle) {
+  if (lifestyle.includes("busy mom")) {
+    return "You’re juggling motherhood and your health goals—your determination is inspiring! Here's a workout plan tailored just for you.";
+  } else if (lifestyle.includes("office job")) {
+    return "Balancing a desk job with your fitness goals isn’t easy, but you’re making it happen! Here's your personalized workout plan.";
+  } else if (lifestyle.includes("student")) {
+    return "Studying hard and staying fit? That’s the ultimate multitasking! Here's a plan to support your journey.";
+  } else {
+    return "Your goals are unique, and so is your strength! Here’s a workout plan crafted to help you thrive.";
+  }
+}
+
+// Meal Plan Logic
+function showMealPlanQuestions() {
+  const workoutResult = document.getElementById("workoutResult");
+
+  // Check if the meal plan form already exists
+  if (document.getElementById("mealPlanForm")) {
+    return; // Prevent duplicate forms from being added
+  }
+
+  // Append the meal plan form below the workout plan
+  workoutResult.insertAdjacentHTML(
+    "beforeend",
+    `
+    <div id="mealPlanSection">
+      <h2 style="text-align: left; font-size: 1.4rem; color: #2c3e50;">Meal Plan Questions:</h2>
+      <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px;">
+        <form id="mealPlanForm">
+          <div class="form-group">
+            <label for="dietStyle">Diet Style:</label>
+            <select id="dietStyle" name="dietStyle" aria-required="true">
+              <option value="" disabled selected>Select Diet Style</option>
+              <option value="keto">Keto</option>
+              <option value="mediterranean">Mediterranean</option>
+              <option value="vegan">Vegan</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="general">General</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="allergies">Allergies or Dietary Restrictions:</label>
+            <select id="allergies" name="allergies" aria-required="true">
+              <option value="" disabled selected>Select Allergies</option>
+              <option value="none">None</option>
+              <option value="gluten">Gluten</option>
+              <option value="nuts">Nuts</option>
+              <option value="dairy">Dairy</option>
+              <option value="shellfish">Shellfish</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="lactoseIntolerant">Are You Lactose Intolerant?</label>
+            <select id="lactoseIntolerant" name="lactoseIntolerant" aria-required="true">
+                            <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="additionalComments">Additional Comments:</label>
+            <textarea id="additionalComments" name="additionalComments" rows="4" placeholder="Add any additional comments..." aria-required="false"></textarea>
+          </div>
+          <button id="submitMealPlan" type="button">Generate Meal Plan</button>
+        </form>
+      </div>
+    </div>`
+  );
+}
+
+// Meal Plan Submission Logic
+document.addEventListener("click", async function (event) {
+  if (event.target && event.target.id === "submitMealPlan") {
+    const mealPreferences = {
+      dietStyle: document.getElementById("dietStyle").value,
+      allergies: document.getElementById("allergies").value,
+      lactoseIntolerant: document.getElementById("lactoseIntolerant").value === "yes",
+      additionalComments: document.getElementById("additionalComments").value,
+    };
+
+    // Validate inputs
+    if (!mealPreferences.dietStyle) {
+      document.getElementById("dietStyle").style.borderColor = "red"; // Highlight invalid field
+      alert("Please select a diet style!");
+      return;
+    }
+    if (!mealPreferences.allergies) {
+      document.getElementById("allergies").style.borderColor = "red"; // Highlight invalid field
+      alert("Please select your allergies or dietary restrictions!");
+      return;
+    }
+
+    console.log("Meal Preferences Sent to Server:", mealPreferences);
+
+    // Ensure a placeholder for error display exists
+    const mealPlanSection = document.getElementById("mealPlanSection");
+    let errorDisplay = document.getElementById("mealPlanError");
+    if (!errorDisplay) {
+      mealPlanSection.insertAdjacentHTML(
+        "beforeend",
+        `<div id="mealPlanError" style="color: red; margin-top: 10px;"></div>`
+      );
+    } else {
+      errorDisplay.innerHTML = ""; // Clear previous errors
+    }
+
+    // Show loading message
+    document.getElementById("mealPlanError").innerHTML = `<p style="text-align: center; font-size: 1.5rem; color: #34495e;">Please wait while we generate your custom meal plan...</p>`;
+
+    // Disable the submit button to prevent multiple submissions
+    const submitButton = document.getElementById("submitMealPlan");
+    submitButton.disabled = true;
+
+    try {
+      // Send API request
+      const data = await generateMealPlan(mealPreferences);
+
+      if (data.error) {
+        console.error("Server Error:", data.error);
+        document.getElementById("mealPlanError").innerHTML = `<p style="text-align: center; font-size: 1.2rem; color: red;">${data.error}. Please try again.</p>`;
+        return;
+      }
+
+      // Render the meal plan dynamically
+      const mealPlanHTML = data.mealPlan
+        .split("Day")
+        .slice(1)
+        .map((day, index) => {
+          const [dayHeader, ...meals] = day.split("\n");
+          return `
+            <div style="margin-bottom: 15px;">
+              <h3 style="text-align: left; font-size: 1.2rem; color: #34495e;">Day ${index + 1}: ${dayHeader.trim()}</h3>
+              <ul style="text-align: left; font-size: 1rem; color: #2c3e50; line-height: 1.6; padding-left: 20px;">
+                ${meals.filter(meal => meal.trim() !== "").map(meal => `<li>${meal.trim()}</li>`).join("")}
+              </ul>
+            </div>`;
+        })
+        .join("");
+
+      // Append meal plan below the form
+      mealPlanSection.innerHTML += `
+        <h2 style="text-align: left; font-size: 1.4rem; color: #2c3e50;">Your Meal Plan:</h2>
+        <div style="background-color: #f4f7fc; padding: 20px; border-radius: 8px;">
+          ${mealPlanHTML}
+        </div>`;
+    } catch (error) {
+      console.error("Error Fetching Meal Plan:", error);
+      document.getElementById("mealPlanError").innerHTML = `<p style="text-align: center; font-size: 1.2rem; color: red;">Error generating meal plan. Please try again.</p>`;
+    } finally {
+      // Re-enable the submit button
+      submitButton.disabled = false;
+    }
+  }
+});
+
+async function generateMealPlan(mealPreferences) {
+  try {
+    const res = await fetch("/generate-meal-plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(mealPreferences),
+    });
+
+    if (!res.ok) {
+      console.error("Failed to fetch meal plan:", res.status, res.statusText);
+      throw new Error("Failed to fetch meal plan.");
+    }
+
+    const data = await res.json();
+
+    if (data.error) {
+      console.error("Server Error:", data.error);
+      throw new Error(data.error);
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in generateMealPlan:", error);
+    throw error;
+  }
+}

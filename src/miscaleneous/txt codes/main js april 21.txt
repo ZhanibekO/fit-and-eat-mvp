@@ -1,0 +1,791 @@
+/*******************************
+ * MAIN.JS - Client-Side Logic *
+ *******************************/
+
+/* ===================== */
+/* UTILITY FUNCTIONS     */
+/* ===================== */
+
+/**
+ * setLoadingMessage(message)
+ * Inserts a loading message into the #workoutResult element.
+ */
+function setLoadingMessage(message) {
+  const workoutResult = document.getElementById("workoutResult");
+  if (!workoutResult) {
+    console.error("#workoutResult element not found in the DOM.");
+    return;
+  }
+  workoutResult.innerHTML = `<p style="text-align:center; font-size:1.5rem; color:#34495e;">${message}</p>`;
+}
+
+/**
+ * setErrorMessage(error, section)
+ * Inserts an error message into the specified element.
+ */
+function setErrorMessage(error, section = "workoutResult") {
+  const sectionEl = document.getElementById(section);
+  if (!sectionEl) {
+    console.error(`#${section} element not found in the DOM.`);
+    return;
+  }
+  sectionEl.innerHTML = `<p style="text-align:center; font-size:1.2rem; color:red;">${error}</p>`;
+  console.error("Error Message Displayed:", error);
+}
+
+/* ===================== */
+/* WORKOUT FORMATTING    */
+/* ===================== */
+
+/**
+ * getExerciseDuration(exerciseLine)
+ * Extracts a duration string (e.g. "30 seconds" or "5 minutes") from exercise text.
+ */
+function getExerciseDuration(exerciseLine) {
+  const timeMatch = exerciseLine.match(/(\d+\s*(minutes|minute|seconds|second))/i);
+  return timeMatch ? timeMatch[0] : null;
+}
+
+/**
+ * formatWorkoutText(text, isCircuit, isSunday, isRestDay)
+ *
+ * Processes the workout text by:
+ *  - Removing static header texts and day markers.
+ *  - Splitting to individual lines.
+ *  - Performing a post‑processing pass to join lines (for instance, joining a lone “Warm”
+ *    with a following “up” to create “Warm Up”).
+ *  - If in circuit mode (for bodyweight/home workouts), formats the exercises with rest intervals.
+ *
+ * Returns "Rest Day" if isRestDay is true, or a concatenated HTML string otherwise.
+ */
+function formatWorkoutText(text, isCircuit = false, isSunday = false, isRestDay = false) {
+  if (!text) return "";
+  if (isRestDay) return "Rest Day";
+
+  // Remove static header text and "Day X:" markers.
+  text = text.replace(/Here is a personalized bodyweight workout plan for you to help achieve your weight loss goal:\s*/gi, "");
+  text = text.replace(/Day\s*\d+:\s*/gi, "");
+  text = text.replace(/of\s*–/gi, "");
+
+  // Split text into lines.
+  let lines = text.split(/\n/);
+  if (lines.length === 1) {
+    lines = text.split(/-\s*/);
+  }
+  lines = lines.map(line => line.trim()).filter(line => line.length > 0);
+
+  // Post-process lines: Attempt to join broken words like "Warm" and "up"
+  let cleanedLines = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (
+      i < lines.length - 1 &&
+      /^Warm$/i.test(lines[i]) &&
+      /^up\b/i.test(lines[i + 1])
+    ) {
+      // Join "Warm" and the next line after removing any extra punctuation or spacing.
+      let nextLine = lines[i + 1].replace(/^up\s*-?\s*/i, "");
+      cleanedLines.push("Warm Up " + nextLine);
+      i++; // Skip the next line as it is already processed.
+    } else {
+      cleanedLines.push(lines[i]);
+    }
+  }
+  
+  // If not in circuit mode or if it's Sunday, simply join the cleaned lines.
+  if (isSunday || !isCircuit) {
+    return cleanedLines.join("<br>");
+  }
+  
+  // For circuit mode: Preserve the header, then format each exercise line with rest intervals.
+  let header = cleanedLines[0];
+  let exercises = cleanedLines.slice(1);
+  let circuitText = "";
+  
+  for (let i = 0; i < exercises.length; i++) {
+    let cleanLine = exercises[i].replace(/^\d+[\.\)]?\s*/, "");
+    let colonIndex = cleanLine.indexOf(":");
+    let exerciseName = colonIndex !== -1 ? cleanLine.substring(0, colonIndex) : cleanLine;
+    let duration = getExerciseDuration(cleanLine) || "1 minute";
+    let formattedLine = `${exerciseName} – ${duration}`;
+    if (i < exercises.length - 1) {
+      circuitText += formattedLine + "<br>Rest: 1 minute<br>";
+    } else {
+      circuitText += formattedLine + "<br>Rest for 2 minutes. Repeat the whole circuit 2 more times.";
+    }
+  }
+  
+  return `${header}<br>${circuitText}`;
+}
+
+/* ===================== */
+/* GROCERY LIST HELPERS  */
+/* ===================== */
+
+/**
+ * categorizeGroceryItems(items)
+ * Categorizes grocery items into Dairy, Produce, Grains, Meat, Frozen, and Miscellaneous.
+ */
+function categorizeGroceryItems(items) {
+  const categories = { Dairy: [], Produce: [], Grains: [], Meat: [], Frozen: [], Miscellaneous: [] };
+  const dairyKeywords = ["milk", "cheese", "yogurt", "butter", "cream", "mozzarella", "feta"];
+  const produceKeywords = ["avocado", "tomato", "cucumber", "lettuce", "greens", "spinach", "asparagus", "broccoli", "berry", "strawberry", "banana", "cherry"];
+  const grainsKeywords = ["bread", "tortilla", "oatmeal", "granola", "rice", "pasta", "quinoa", "pancake"];
+  const meatKeywords = ["chicken", "turkey", "beef", "steak", "cod", "salmon", "shrimp", "tuna"];
+  const frozenKeywords = ["frozen"];
+
+  items.forEach(item => {
+    const lower = item.toLowerCase();
+    let assigned = false;
+    if (dairyKeywords.some(word => lower.includes(word))) { categories.Dairy.push(item); assigned = true; }
+    if (!assigned && produceKeywords.some(word => lower.includes(word))) { categories.Produce.push(item); assigned = true; }
+    if (!assigned && grainsKeywords.some(word => lower.includes(word))) { categories.Grains.push(item); assigned = true; }
+    if (!assigned && meatKeywords.some(word => lower.includes(word))) { categories.Meat.push(item); assigned = true; }
+    if (!assigned && frozenKeywords.some(word => lower.includes(word))) { categories.Frozen.push(item); assigned = true; }
+    if (!assigned) { categories.Miscellaneous.push(item); }
+  });
+  return categories;
+}
+
+/**
+ * separateProduce(items)
+ * Separates produce into vegetables and fruits.
+ */
+function separateProduce(items) {
+  const fruitKeywords = ["apple", "banana", "orange", "berry", "strawberry", "blueberry", "mango", "grape", "cherry"];
+  const vegetables = [];
+  const fruits = [];
+  items.forEach(item => {
+    const lower = item.toLowerCase();
+    if (fruitKeywords.some(word => lower.includes(word))) { fruits.push(item); }
+    else { vegetables.push(item); }
+  });
+  return { vegetables, fruits };
+}
+
+/**
+ * remapCategories(originalCategories)
+ * Remaps grocery categories to new headers.
+ */
+function remapCategories(originalCategories) {
+  const { vegetables, fruits } = separateProduce(originalCategories.Produce);
+  return {
+    "Protein Sources": originalCategories.Meat,
+    "Grains & Carbs": originalCategories.Grains,
+    "Vegetables": vegetables,
+    "Fruits": fruits,
+    "Healthy Fats & Extras": originalCategories.Dairy.concat(originalCategories.Frozen),
+    "Seasonings & Pantry Staples": originalCategories.Miscellaneous
+  };
+}
+
+/* ===================== */
+/* DOCUMENT READY: EVENT HANDLERS */
+/* ===================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Continue Button: Show details section.
+  const continueButton = document.getElementById("continueDetails");
+  if (!continueButton) { console.error("Button with ID 'continueDetails' not found."); return; }
+  continueButton.addEventListener("click", async function () {
+    console.log("Continue button clicked.");
+    const userGoals = document.getElementById("userGoals")?.value.trim();
+    const warningEl = document.getElementById("goalsWarning");
+    if (!userGoals) {
+      if (warningEl) { warningEl.style.display = "block"; }
+      console.warn("User goals input is empty.");
+      return;
+    }
+    if (warningEl) { warningEl.style.display = "none"; }
+    const detailsSection = document.getElementById("detailsSection");
+    if (!detailsSection) { console.error("#detailsSection not found in the DOM."); return; }
+    detailsSection.style.display = "block";
+    detailsSection.classList.add("visible");
+    console.log("Details section displayed successfully.");
+    try {
+      const res = await fetch("/submit-goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userGoals }),
+      });
+      const data = await res.json();
+      console.log("Server Response:", data);
+      if (!data.success) {
+        console.warn("Failed to submit user goals:", data.message);
+        setErrorMessage("Failed to submit goals. Try again.");
+      } else {
+        const successMessage = document.getElementById("successMessage");
+        if (successMessage) {
+          successMessage.textContent = "Your goals were successfully submitted!";
+          successMessage.style.display = "block";
+          console.log("Goals submitted successfully.");
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting user goals to the server:", error);
+    }
+  });
+
+  // Toggle target weight input based on fitness goal selection.
+  document.getElementById("fitnessGoal").addEventListener("change", function () {
+    const goalInput = document.getElementById("goalWeightInput");
+    const selectedGoal = this.value;
+    if (selectedGoal === "gainWeight" || selectedGoal === "loseWeight") {
+      goalInput.style.display = "block";
+      console.log("Weight goal input is now visible.");
+    } else {
+      goalInput.style.display = "none";
+      console.log("Weight goal input is now hidden.");
+    }
+  });
+
+  // Ensure the Generate Workout button uses the meal-plan-btn style.
+  document.getElementById("generateWorkout").classList.add("meal-plan-btn");
+});
+
+/* ===================== */
+/* WORKOUT PLAN GENERATION */
+/* ===================== */
+
+/**
+ * Generate Workout Plan:
+ * - Sends a POST request to /api/workouts/generate-workout with user input.
+ * - Attempts to split the returned workout text into 7 days.
+ *   If explicit day markers are found, they're used.
+ *   Otherwise, text is evenly split.
+ * - For Sunday, enforces a rest day.
+ * - Builds a two-column table (Day and Exercise Routine) and displays it.
+ */
+document.getElementById("generateWorkout").addEventListener("click", async function () {
+  const workoutResult = document.getElementById("workoutResult");
+  setLoadingMessage("Please wait while we generate your custom workout plan...");
+  workoutResult.style.display = "block";
+  
+  // Extract workout input.
+  const age = document.getElementById("age")?.value.trim();
+  const currentWeight = document.getElementById("weight")?.value.trim(); 
+  const fitnessGoal = document.getElementById("fitnessGoal")?.value.trim();
+  if (!age || age <= 0) {
+    workoutResult.innerHTML = `<p style="text-align:center; color:red;">Age must be a positive number.</p>`;
+    return;
+  }
+  if (!currentWeight || currentWeight <= 0) {
+    workoutResult.innerHTML = `<p style="text-align:center; color:red;">Current weight must be a positive number.</p>`;
+    return;
+  }
+  if (!fitnessGoal) {
+    workoutResult.innerHTML = `<p style="text-align:center; color:red;">Please select a fitness goal.</p>`;
+    return;
+  }
+  
+  // Build the user input object with additional fields.
+  const userInput = {
+    gender: document.getElementById("gender")?.value,
+    age,
+    weight: currentWeight,
+    weightUnit: document.getElementById("weightUnit")?.value,
+    height: document.getElementById("height")?.value,
+    heightUnit: document.getElementById("heightUnit")?.value,
+    fitnessGoal,
+    goalWeight: document.getElementById("goalWeight")?.value,
+    workoutType: document.getElementById("workoutType")?.value,
+    lifestyle: document.getElementById("userGoals")?.value.trim(),
+    fitnessLevel: document.getElementById("fitnessLevel")?.value,
+    timeCommitment: document.getElementById("timeCommitment")?.value,
+    activityLevel: document.getElementById("activityLevel")?.value,
+    equipment: (() => {
+      const elems = document.querySelectorAll("input[name='equipment']:checked");
+      return Array.from(elems).map(el => el.value);
+    })()
+  };
+  console.log("User Input Sent to Server:", userInput);
+  
+  try {
+    const res = await fetch("/api/workouts/generate-workout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userInput)
+    });
+    const data = await res.json();
+    console.log("Server Response:", data);
+    if (!res.ok || (data.error && data.error !== null)) {
+      setErrorMessage("Error generating workout plan. Please try again.");
+      console.error("Server Error:", data.error);
+      return;
+    }
+    
+    // Remove any static header text.
+    let workoutText = data.workout.replace(/Here is a personalized bodyweight workout plan for you to help achieve your weight loss goal:\s*/gi, "").trim();
+    
+    // Try splitting by explicit "Day X:" markers.
+    let workoutsByDay = {};
+    const dayRegex = /Day\s*(\d+):/gi;
+    if (dayRegex.test(workoutText)) {
+      dayRegex.lastIndex = 0;
+      let splitMatch;
+      let segments = [];
+      let lastIndex = 0;
+      while ((splitMatch = dayRegex.exec(workoutText)) !== null) {
+        const currentIndex = splitMatch.index;
+        if (currentIndex > lastIndex) {
+          segments.push(workoutText.substring(lastIndex, currentIndex).trim());
+        }
+        lastIndex = currentIndex;
+      }
+      segments.push(workoutText.substring(lastIndex).trim());
+      if (segments.length >= 7) {
+        for (let i = 0; i < 7; i++) {
+          workoutsByDay[i + 1] = segments[i];
+        }
+      }
+    }
+    
+    // Fallback: if fewer than 7 segments, split evenly by newlines.
+    if (Object.keys(workoutsByDay).length < 7) {
+      const lines = workoutText.split("\n").filter(line => line.trim());
+      const chunkSize = Math.ceil(lines.length / 7);
+      for (let i = 0; i < 7; i++) {
+        workoutsByDay[i + 1] = lines.slice(i * chunkSize, (i + 1) * chunkSize).join("<br>");
+      }
+    }
+    
+    // Format each day's workout—if in circuit mode—and enforce Sunday as a rest day.
+    let isCircuit = (userInput.workoutType.toLowerCase() === "bodyweight" ||
+                     userInput.workoutType.toLowerCase() === "home");
+    for (let i = 1; i <= 7; i++) {
+      const isSunday = (i === 7);
+      workoutsByDay[i] = isSunday ? "Rest Day" :
+        (isCircuit ? formatWorkoutText(workoutsByDay[i], isCircuit, false) : workoutsByDay[i]);
+    }
+    
+    // Build table rows.
+    let tableRows = "";
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    for (let i = 1; i <= 7; i++) {
+      tableRows += `<tr>
+         <td style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#333; font-weight:bold;">
+           Day ${i}: ${dayNames[i - 1]}
+         </td>
+         <td style="padding:8px; border:1px solid #ccc; color:#333;">
+           ${workoutsByDay[i] || "N/A"}
+         </td>
+      </tr>`;
+    }
+    
+    const finalMessage = `<p style="text-align:center; color:#34495e; font-size:1rem;">
+      This workout is not a race – go at a pace that suits your fitness level. Adjust intensity and rest as needed.
+      Remember to warm up before each workout and cool down afterwards. Stay hydrated and listen to your body.
+      As you progress, increase reps, sets, or difficulty to keep challenging yourself. Good luck on your weight loss journey!
+    </p>`;
+    
+    const tableHTML = `
+      <p style="text-align:center; color:#34495e; font-size:1.2rem;">
+        Here is a personalized ${userInput.workoutType} workout plan to help you achieve your ${userInput.fitnessGoal} goal.
+      </p>
+      <table class="workout-table">
+        <thead>
+          <tr>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#333;">Day</th>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#333;">Exercise Routine</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+      ${finalMessage}
+      <div style="text-align:center; margin-top:20px;">
+        <button id="generateMealPlan" class="meal-plan-btn">Generate Custom Meal Plan</button>
+      </div>
+    `;
+    
+    workoutResult.innerHTML = tableHTML;
+    document.getElementById("generateMealPlan").addEventListener("click", showMealPlanQuestions);
+    console.log("Workout plan displayed as a two-column table successfully.");
+  } catch (error) {
+    console.error("Error Fetching Workout Plan:", error);
+    setErrorMessage("Error generating workout plan. Please try again.");
+  }
+});
+
+/* ===================== */
+/* MEAL PLAN SECTION */
+/* ===================== */
+
+// Default macros string fallback.
+const DEFAULT_MACROS = "Breakfast: 300 kcal, 15g protein, 10g fat, 45g carbs; Lunch: 500 kcal, 30g protein, 15g fat, 60g carbs; Dinner: 600 kcal, 35g protein, 20g fat, 70g carbs; Total: 1400 kcal, 80g protein, 45g fat, 175g carbs.";
+
+/**
+ * showMealPlanQuestions()
+ * Inserts the meal plan questions form into the page if not already present.
+ * The form now does not ask for specific nutritional numbers – instead, it allows the AI to generate them based on the user's goals.
+ * Additionally, it asks whether the user wants to create a brand new meal plan or use their existing pantry inventory.
+ */
+function showMealPlanQuestions() {
+  const workoutResult = document.getElementById("workoutResult");
+  if (document.getElementById("mealPlanForm")) return;
+  workoutResult.insertAdjacentHTML(
+    "beforeend",
+    `<div id="mealPlanSection">
+      <h2 style="text-align:left; color:#34495e;">Meal Plan Questions:</h2>
+      <div style="background-color:#f9f9f9; padding:20px; border-radius:8px;">
+        <form id="mealPlanForm">
+          <div class="form-group">
+            <label for="dietStyle" style="color:#34495e;">Diet Style:</label>
+            <select id="dietStyle" name="dietStyle" aria-required="true">
+              <option value="" disabled selected>Select Diet Style</option>
+              <option value="keto">Keto</option>
+              <option value="mediterranean">Mediterranean</option>
+              <option value="vegan">Vegan</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="general">General</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="allergies" style="color:#34495e;">Allergies or Dietary Restrictions:</label>
+            <select id="allergies" name="allergies" aria-required="true">
+              <option value="" disabled selected>Select Allergies</option>
+              <option value="none">None</option>
+              <option value="gluten">Gluten</option>
+              <option value="nuts">Nuts</option>
+              <option value="dairy">Dairy</option>
+              <option value="shellfish">Shellfish</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="lactoseIntolerant" style="color:#34495e;">Are You Lactose Intolerant?</label>
+            <select id="lactoseIntolerant" name="lactoseIntolerant" aria-required="true">
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="additionalComments" style="color:#34495e;">Additional Comments:</label>
+            <textarea id="additionalComments" name="additionalComments" rows="4" placeholder="Add any additional comments..." aria-required="false"></textarea>
+          </div>
+          <!-- New Meal Plan Option -->
+          <div class="form-group">
+            <label>Meal Plan Option:</label>
+            <div>
+              <label><input type="radio" name="mealPlanOption" value="new" checked> Create a brand new meal plan</label>
+              <label><input type="radio" name="mealPlanOption" value="pantry"> Use my pantry inventory</label>
+            </div>
+          </div>
+          <div class="form-group" id="pantryField" style="display: none;">
+            <label for="pantryItems" style="color:#34495e;">Your Pantry Inventory (comma‑separated):</label>
+            <input type="text" id="pantryItems" name="pantryItems" placeholder="e.g., Rice, Beans, Olive Oil">
+          </div>
+          <button id="submitMealPlan" type="button" class="meal-plan-btn">Generate Meal Plan</button>
+        </form>
+      </div>
+    </div>`
+  );
+  
+  // Show/hide the Pantry Inventory field based on the selected meal plan option.
+  const mealPlanOptions = document.getElementsByName("mealPlanOption");
+  mealPlanOptions.forEach(option => {
+    option.addEventListener("change", function() {
+      const pantryField = document.getElementById("pantryField");
+      if (this.value === "pantry") {
+        pantryField.style.display = "block";
+      } else {
+        pantryField.style.display = "none";
+      }
+    });
+  });
+}
+
+/**
+ * Generate Meal Plan:
+ * Processes the /api/meals/generate-meal-plan API response and builds two full-width tables:
+ * - Table 1: Weekly Meal Plan (Day | Meals (click for recipe) | Macros)
+ * - Table 2: Grocery List (categorized).
+ */
+document.addEventListener("click", async function (event) {
+  if (event.target && event.target.id === "submitMealPlan") {
+    const mealPreferences = {
+      dietStyle: document.getElementById("dietStyle")?.value,
+      allergies: document.getElementById("allergies")?.value,
+      lactoseIntolerant: document.getElementById("lactoseIntolerant")?.value === "yes",
+      additionalComments: document.getElementById("additionalComments")?.value,
+      mealPlanOption: document.querySelector("input[name='mealPlanOption']:checked")?.value,
+      pantryItems: document.getElementById("pantryItems")?.value
+    };
+    if (!mealPreferences.dietStyle || !mealPreferences.allergies) {
+      alert("Please complete all required fields!");
+      return;
+    }
+    console.log("Meal Preferences Sent to Server:", mealPreferences);
+    const submitButton = document.getElementById("submitMealPlan");
+    submitButton.disabled = true;
+    
+    try {
+      const res = await fetch("/api/meals/generate-meal-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mealPreferences),
+      });
+      if (!res.ok) {
+        throw new Error(`Server responded with status ${res.status}: ${res.statusText}`);
+      }
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      
+      // -------------- Table 1: Weekly Meal Plan --------------
+      let mealPlanText = data.mealPlan.split(/Grocery List:/i)[0].trim();
+      // Try matching explicit day markers (e.g., "Monday:", "Tuesday:", etc.)
+      let dayMealRegex = /(?<=^|\n)(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday):([\s\S]*?)(?=(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday):|$)/gi;
+      let dayMealMatch;
+      let dailyPlans = {};
+      while (dayMealMatch = dayMealRegex.exec(mealPlanText)) {
+        let dayName = dayMealMatch[1].trim();
+        let dayContent = dayMealMatch[2].trim();
+        let mealsPart = "";
+        let macrosPart = "";
+        if (dayContent.includes("Meals:")) {
+          let parts = dayContent.split(/Meals:/i);
+          if (parts.length > 1) {
+            let subParts = parts[1].split(/Macros:/i);
+            mealsPart = subParts[0].trim();
+            macrosPart = (subParts[1] || "").trim();
+          } else {
+            mealsPart = dayContent;
+          }
+        } else {
+          mealsPart = dayContent;
+        }
+        if (!macrosPart || macrosPart === "N/A") {
+          macrosPart = DEFAULT_MACROS;
+        }
+        dailyPlans[dayName] = { meals: mealsPart, macros: macrosPart };
+      }
+      
+      // Fallback: if fewer than 7 days are detected, split evenly by newlines.
+      const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      if (Object.keys(dailyPlans).length < 7) {
+        const lines = mealPlanText.split("\n").filter(line => line.trim());
+        const chunkSize = Math.ceil(lines.length / 7);
+        for (let i = 0; i < 7; i++) {
+          dailyPlans[weekDays[i]] = { meals: lines.slice(i * chunkSize, (i + 1) * chunkSize).join("<br>"), macros: DEFAULT_MACROS };
+        }
+      }
+      
+      // Build the weekly meal plan table.
+      let weeklyMealPlanHTML = `
+        <table style="width:100%; border-collapse:collapse; margin-top:20px; background-color:#fff;">
+          <thead>
+            <tr>
+              <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Day</th>
+              <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Meals (click for recipe)</th>
+              <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Macros</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      
+      weekDays.forEach(day => {
+        let mealsHTML = "N/A";
+        let macrosHTML = "N/A";
+        if (dailyPlans[day]) {
+          let mealsList = dailyPlans[day].meals.split(";").map(meal => {
+            meal = meal.trim();
+            if (meal) {
+              let displayMeal = meal.replace(/\(.*\)/, "").trim();
+              return `<a class="recipe-link" href="#" onclick="showRecipePopup('${meal.replace(/'/g, "\\'")}'); return false;">${displayMeal}</a>`;
+            }
+            return "";
+          }).filter(x => x !== "").join("<br>");
+          mealsHTML = mealsList;
+          macrosHTML = dailyPlans[day].macros.replace(/\n/g, "<br>");
+        }
+        weeklyMealPlanHTML += `
+          <tr>
+            <td style="padding:8px; border:1px solid #ccc; background-color:#f0f0f0; color:#333;">${day}</td>
+            <td style="padding:8px; border:1px solid #ccc; color:#333;">${mealsHTML}</td>
+            <td style="padding:8px; border:1px solid #ccc; color:#333;">${macrosHTML}</td>
+          </tr>`;
+      });
+      
+      weeklyMealPlanHTML += `</tbody></table>`;
+      
+      // -------------- Table 2: Grocery List --------------
+      let groceryDurationHTML = `
+        <div style="margin-top:20px; text-align:left;">
+          <label style="font-weight:bold; color:#333;">Grocery Duration:
+            <select id="groceryDuration" style="padding:4px;">
+              <option value="week">Week</option>
+              <option value="month">Month</option>
+            </select>
+          </label>
+        </div>`;
+      
+      let groceryListText = "";
+      const groceryMatch = data.mealPlan.match(/Grocery List:\s*([\s\S]*)/i);
+      if (groceryMatch && groceryMatch[1]) {
+        groceryListText = groceryMatch[1].trim();
+      }
+      
+      const groceriesArray = groceryListText.split("\n").filter(item => item.trim() !== "");
+      
+      /**
+       * formatGroceryItem(item, duration)
+       * If a numeric quantity with a unit is found, multiplies by 4 when duration is "month".
+       * Otherwise, returns the clean item text.
+       */
+      function formatGroceryItem(item, duration) {
+        let cleanItem = item.replace(/^-+\s*/, "").trim();
+        let regex = /(\d+(\.\d+)?)\s*(kg|g|lbs|ml|l|cup|tbsp|tsp)/i;
+        let match = cleanItem.match(regex);
+        if (match) {
+          let num = parseFloat(match[1]);
+          let unit = match[3];
+          if (duration === "month") { num = num * 4; }
+          cleanItem = cleanItem.replace(regex, "").trim();
+          return `${cleanItem} (${num} ${unit})`;
+        } else {
+          return cleanItem;
+        }
+      }
+      
+      let duration = document.getElementById("groceryDuration") ? document.getElementById("groceryDuration").value : "week";
+      const originalCategories = categorizeGroceryItems(groceriesArray);
+      const newCategories = remapCategories(originalCategories);
+      
+      let groceryHTML = `<table style="width:100%; border-collapse:collapse; margin-top:10px; background-color:#fff; font-size:0.9rem;">
+        <thead>
+          <tr>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Protein Sources</th>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Grains & Carbs</th>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Vegetables</th>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Fruits</th>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Healthy Fats & Extras</th>
+            <th style="padding:8px; border:1px solid #ccc; background-color:#1e90ff; color:#fff;">Seasonings & Pantry Staples</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>`;
+      
+      Object.entries(newCategories).forEach(([category, items]) => {
+        let itemsHTML = items.map(item => `<p style="margin:4px 0; text-align:left;">${formatGroceryItem(item, duration)}</p>`).join("");
+        groceryHTML += `<td style="padding:8px; border:1px solid #ccc; vertical-align:top; color:#333;">${itemsHTML || "N/A"}</td>`;
+      });
+      
+      groceryHTML += `</tr></tbody></table>`;
+      
+      const additionalNote = `<p style="text-align:center; color:#666; font-size:0.9rem; margin-top:10px;">
+        This grocery list is for one person only. Quantities have been calculated accordingly.
+      </p>`;
+      
+      const mealPlanHTML = `
+        <h2 style="text-align:center; color:#34495e; margin-top:20px;">Weekly Meal Plan</h2>
+        ${weeklyMealPlanHTML}
+        <h2 style="text-align:center; color:#34495e; margin-top:20px;">Grocery Shopping List</h2>
+        ${groceryDurationHTML}
+        ${groceryHTML}
+        ${additionalNote}
+      `;
+      
+      const mealPlanSection = document.getElementById("mealPlanSection");
+      mealPlanSection.innerHTML = mealPlanHTML;
+      console.log("Meal plan displayed successfully.");
+    } catch (error) {
+      console.error("Error Fetching Meal Plan:", error);
+      const mealPlanSection = document.getElementById("mealPlanSection");
+      if (mealPlanSection) {
+        mealPlanSection.insertAdjacentHTML(
+          "beforeend",
+          `<p id="mealPlanError" style="color:red; text-align:center; font-size:1.2rem;">Error generating meal plan. Please try again.</p>`
+        );
+      }
+    } finally {
+      submitButton.disabled = false;
+    }
+  }
+});
+
+/* ===================== */
+/* RECIPE POPUP FUNCTION */
+/* ===================== */
+
+/**
+ * showRecipePopup(meal)
+ * Displays a modal popup with detailed recipe information for the selected meal.
+ * The modal includes step-by-step instructions, ingredients, and portion adjustment controls.
+ */
+function showRecipePopup(meal) {
+  // Create modal container if it doesn't exist.
+  let modal = document.getElementById("recipeModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "recipeModal";
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.backgroundColor = "rgba(0,0,0,0.6)";
+    modal.style.display = "flex";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+    modal.style.zIndex = "1000";
+    document.body.appendChild(modal);
+  }
+
+  // Create modal content container if it doesn't exist.
+  let modalContent = document.getElementById("recipeModalContent");
+  if (!modalContent) {
+    modalContent = document.createElement("div");
+    modalContent.id = "recipeModalContent";
+    modalContent.style.backgroundColor = "#fff";
+    modalContent.style.padding = "20px";
+    modalContent.style.borderRadius = "8px";
+    modalContent.style.maxWidth = "600px";
+    modalContent.style.width = "90%";
+    modalContent.style.maxHeight = "80%";
+    modalContent.style.overflowY = "auto";
+    modal.appendChild(modalContent);
+  }
+
+  // Update modal content with recipe details.
+  modalContent.innerHTML = `
+    <h2 style="margin-bottom:10px;">Recipe Details for: ${meal}</h2>
+    <p>This recipe provides detailed, step-by-step instructions along with a list of ingredients and their quantities. Adjust portions as needed.</p>
+    <p><strong>Ingredients:</strong> For example: 2 eggs, 1 cup spinach, 1/4 cup feta cheese.</p>
+    <p><strong>Instructions:</strong></p>
+    <ol>
+      <li>Preheat your oven/stove if needed.</li>
+      <li>Prepare and measure all ingredients.</li>
+      <li>Follow the detailed instructions to cook the dish.</li>
+      <li>Plate your dish attractively and garnish as desired.</li>
+    </ol>
+    <p><strong>Portions:</strong></p>
+    <div style="margin-top:10px;">
+      <button id="decreasePortion" style="margin-right:10px; padding:5px 10px;">-</button>
+      <button id="increasePortion" style="padding:5px 10px;">+</button>
+      <span style="margin-left:10px;">Current Portions: <span id="currentPortions">1</span></span>
+    </div>
+    <button id="closeRecipeModal" style="margin-top:20px; padding:10px 20px; border:none; border-radius:5px; background-color:#1e90ff; color:#fff; cursor:pointer;">Close</button>
+  `;
+
+  // Show the modal.
+  modal.style.display = "flex";
+
+  // Portion adjustment logic.
+  let currentPortions = 1;
+  document.getElementById("decreasePortion").onclick = () => {
+    if (currentPortions > 1) {
+      currentPortions--;
+      document.getElementById("currentPortions").innerText = currentPortions;
+    }
+  };
+  document.getElementById("increasePortion").onclick = () => {
+    currentPortions++;
+    document.getElementById("currentPortions").innerText = currentPortions;
+  };
+
+  // Close modal when "Close" is clicked.
+  document.getElementById("closeRecipeModal").onclick = () => {
+    modal.style.display = "none";
+  };
+}
+
+console.log("JavaScript file loaded successfully.");
+console.log("Event listeners initialized.");
