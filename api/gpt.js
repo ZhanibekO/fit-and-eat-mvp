@@ -18,24 +18,27 @@ export default async function handler(req, res) {
     }
   
     try {
-      // Make a request to the OpenAI completions endpoint with a supported model
-      const response = await fetch("https://api.openai.com/v1/completions", {
+      // Use the Chat Completions endpoint with the gpt-3.5-turbo model.
+      // This requires a slightly different request body structure.
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "text-davinci-003",  // Use the supported model here
-          prompt: prompt,
+          model: "gpt-3.5-turbo", // Supported and current model
+          messages: [
+            { role: "user", content: prompt }
+          ],
           max_tokens: 100,
         }),
       });
   
-      // If the GPT API response isn’t OK, capture the error details
+      // If the OpenAI API response isn’t OK, capture the detailed error.
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("GPT API Error:", errorText);
+        console.error("OpenAI API Error:", errorText);
         return res.status(response.status).json({ error: "Error generating workout plan.", details: errorText });
       }
   
