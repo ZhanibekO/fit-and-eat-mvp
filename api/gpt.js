@@ -11,14 +11,14 @@ export default async function handler(req, res) {
     const { prompt } = req.body;
   
     // Retrieve the GPT API key from environment variables
-    const apiKey = process.env.GPT_API_KEY; // Ensure this is set in Vercel
+    const apiKey = process.env.GPT_API_KEY; // Ensure this variable is set in Vercel
   
     if (!apiKey) {
       return res.status(500).json({ error: 'API Key not configured.' });
     }
   
     try {
-      // Updated API call using the general completions endpoint and specifying the supported model
+      // Make a request to the OpenAI completions endpoint with a supported model
       const response = await fetch("https://api.openai.com/v1/completions", {
         method: "POST",
         headers: {
@@ -26,17 +26,17 @@ export default async function handler(req, res) {
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "text-davinci-003",  // Specify the supported model here
+          model: "text-davinci-003",  // Use the supported model here
           prompt: prompt,
           max_tokens: 100,
         }),
       });
   
-      // Check if the response is not OK
+      // If the GPT API response isn’t OK, capture the error details
       if (!response.ok) {
         const errorText = await response.text();
         console.error("GPT API Error:", errorText);
-        return res.status(response.status).json({ error: "Error generating workout plan." });
+        return res.status(response.status).json({ error: "Error generating workout plan.", details: errorText });
       }
   
       // Parse and return the response
