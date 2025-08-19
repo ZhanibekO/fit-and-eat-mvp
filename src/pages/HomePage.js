@@ -305,7 +305,7 @@ const HomePage = () => {
     setWorkoutResult(<p style={{ textAlign: "center" }}>Generating your custom workout plan...</p>);
 
     try {
-      const response = await fetch("/api/workouts", {
+      const response = await fetch("/api/gpt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userGoals, formData })
