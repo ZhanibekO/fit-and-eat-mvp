@@ -311,18 +311,41 @@ const HomePage = () => {
         body: JSON.stringify({ userGoals, formData })
       });
       const data = await response.json();
-      setWorkoutResult(
-        <div
-          className="workout-result"
-          dangerouslySetInnerHTML={{ __html: compressHTML(data.workout) }}
-        />
-      );
-      setWorkoutGenerated(true);
+
+      // Handle HTTP errors or server-side errors
+      if (!response.ok || data.error) {
+        setWorkoutResult(
+          <p style={{ color: "red" }}>
+            {data.error || "An error occurred while generating your workout plan. Please try again later."}
+          </p>
+        );
+        setWorkoutGenerated(false);
+      } else if (data.workout) {
+        setWorkoutResult(
+          <div
+            className="workout-result"
+            dangerouslySetInnerHTML={{ __html: compressHTML(data.workout) }}
+          />
+        );
+        setWorkoutGenerated(true);
+      } else {
+        setWorkoutResult(
+          <p style={{ color: "red" }}>
+            Unexpected response format. Please try again later.
+          </p>
+        );
+        setWorkoutGenerated(false);
+      }
     } catch (error) {
-      setWorkoutResult(<p style={{ color: "red" }}>Error generating workout plan. Please try again later.</p>);
+      setWorkoutResult(
+        <p style={{ color: "red" }}>
+          Network error: Unable to generate workout plan. Please check your connection and try again.
+        </p>
+      );
       setWorkoutGenerated(false);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // --- Meal Plan Generation ---
@@ -536,8 +559,8 @@ const HomePage = () => {
                   onChange={handleChange}
                 />
               </div>
-              <button id="generateWorkout" type="button" onClick={handleGenerateWorkout}>
-                Generate Workout
+              <button id="generateWorkout" type="button" onClick={handleGenerateWorkout} disabled={loading}>
+                {loading ? "Generating..." : "Generate Workout"}
               </button>
             </form>
             <div id="workoutResult">{workoutResult}</div>
@@ -649,8 +672,8 @@ const HomePage = () => {
                   </div>
                 </div>
                 <div style={{ textAlign: "center", margin: "20px 0" }}>
-                  <button id="submitMealPlan" className="meal-plan-btn" onClick={submitMealPlanRequest}>
-                    Generate Custom Meal Plan
+                  <button id="submitMealPlan" className="meal-plan-btn" onClick={submitMealPlanRequest} disabled={loading}>
+                    {loading ? "Generating..." : "Generate Custom Meal Plan"}
                   </button>
                 </div>
                 {/* Meal Plan Result */}
