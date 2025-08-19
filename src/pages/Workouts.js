@@ -36,47 +36,70 @@ const Workouts = () => {
   const timerRef = useRef(null);
 
   // -----------------------
-  // Fetch workouts data from API
-  // -----------------------
-  useEffect(() => {
-    const fetchWorkouts = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/workouts");
-        const data = await res.json();
-        if (data && data.workouts) {
-          setWorkouts(data.workouts);
-          setFilteredWorkouts(data.workouts);
-        } else {
-          setError("No workouts data received.");
-        }
-      } catch (err) {
-        console.error("Error fetching workouts:", err);
-        setError("Failed to load workouts. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchWorkouts();
-  }, []);
+// Fetch workouts data from GPT
+// -----------------------
+useEffect(() => {
+  const fetchWorkouts = async () => {
+    setLoading(true);
+    try {
+      const prompt = "Generate a diverse list of 10 beginner‑friendly workouts. Each should include: name, main muscle groups, and a short tip.";
 
-  // -----------------------
-  // Fetch recommended workouts
-  // -----------------------
-  useEffect(() => {
-    const fetchRecommended = async () => {
-      try {
-        const res = await fetch("/api/workouts/recommendations");
-        const data = await res.json();
-        if (data && data.recommended) {
-          setRecommendedWorkouts(data.recommended);
-        }
-      } catch (err) {
-        console.error("Error fetching recommended workouts:", err);
+      const res = await fetch("/api/gpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+
+      if (!res.ok) {
+        throw new Error(`API responded with ${res.status}`);
       }
-    };
-    fetchRecommended();
-  }, []);
+
+      const data = await res.json();
+      const content = data?.choices?.[0]?.message?.content || "";
+
+      // Store GPT’s text in your existing array state
+      setWorkouts([{ name: "AI Generated Plan", details: content }]);
+      setFilteredWorkouts([{ name: "AI Generated Plan", details: content }]);
+    } catch (err) {
+      console.error("Error fetching workouts:", err);
+      setError("Failed to load workouts. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchWorkouts();
+}, []);
+
+
+// -----------------------
+// Fetch recommended workouts from GPT
+// -----------------------
+useEffect(() => {
+  const fetchRecommended = async () => {
+    try {
+      const prompt = "Recommend 5 personalized workouts for a user aiming for fat loss and cardio endurance. Each should include: name, main focus, and 1‑sentence benefit.";
+
+      const res = await fetch("/api/gpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+
+      if (!res.ok) {
+        throw new Error(`API responded with ${res.status}`);
+      }
+
+      const data = await res.json();
+      const content = data?.choices?.[0]?.message?.content || "";
+
+      setRecommendedWorkouts([{ name: "AI Recommendations", details: content }]);
+    } catch (err) {
+      console.error("Error fetching recommended workouts:", err);
+    }
+  };
+  fetchRecommended();
+}, []);
+
 
   // -----------------------
   // Filtering & Sorting: reset page and refilter when search, filters, sortOption, or workouts change
